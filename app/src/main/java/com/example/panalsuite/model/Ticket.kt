@@ -10,11 +10,12 @@ data class TicketComment(
 data class Ticket(
     val id: Int,
     val title: String,
+    val description: String,
     val category: TicketCategory,
     val priority: TicketPriority,
     val status: TicketStatus,
     val location: String,
-    val requester: Int,
-    val assigned: Int,
-    val comment: TicketComment
+    val requester: String,
+    val assigned: String,
+    val comment: List<TicketComment> = emptyList()
 )
