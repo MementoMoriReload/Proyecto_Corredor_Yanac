@@ -15,7 +15,9 @@ data class Ticket(
     val priority: TicketPriority,
     val status: TicketStatus,
     val location: String,
-    val requester: String,
-    val assigned: String,
-    val comment: List<TicketComment> = emptyList()
+    val requesterId: String,
+    val assignedId: String?,
+    val comments: List<TicketComment> = emptyList(),
+    val createdAt: String,
+    val updatedAt: String
 )
