@@ -66,7 +66,7 @@ fun AppNavHost(
         ) {
             composable(Routes.LOGIN) {
                 LoginScreen(
-                    authviewModel = authViewModel,
+                    authViewModel = authViewModel,
                     onLoginSuccess = {
                         navController.navigate(Routes.TICKET_LIST) {
                             popUpTo(Routes.LOGIN) { inclusive = true }

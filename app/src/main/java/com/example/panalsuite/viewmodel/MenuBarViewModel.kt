@@ -20,15 +20,13 @@ object MenuBarViewModel {
                 items.add("Gestión de Usuarios" to onManagementClick)
             }
 
-            UserRole.RESOLVER -> {
+            UserRole.RESOLVER, UserRole.SUPERVISOR, UserRole.MANAGER -> {
                 items.add("Dashboard" to onDashboardClick)
-
             }
 
-            //Placeholder
-            UserRole.REQUESTER -> TODO()
-            UserRole.SUPERVISOR -> TODO()
-            UserRole.MANAGER -> TODO()
+            UserRole.REQUESTER -> {
+                // Requester only has default menu items (Perfil, Cerrar sesión)
+            }
         }
 
             items.add("Cerrar sesión" to onLogoutClick)

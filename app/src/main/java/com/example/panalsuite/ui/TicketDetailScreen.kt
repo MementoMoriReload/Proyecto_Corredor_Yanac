@@ -138,7 +138,7 @@ fun TicketDetailScreenContent(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ){
                                 Text(
-                                    text= "Estado:",
+                                    text= "Estado: ",
                                     style = MaterialTheme.typography.labelLarge
                                 )
                                 StatusBadge(status = ticket.status)
