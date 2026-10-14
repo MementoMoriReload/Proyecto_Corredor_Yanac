@@ -9,7 +9,7 @@ class AuthRepository{
         User("u2", "Martin Contreras", "martin@panal.cl",null, UserRole.RESOLVER),
         User("u3", "Marta Hernandez", "marta@panal.cl",null, UserRole.SUPERVISOR),
         User("u4", "Helena Vera", "helena@panal.cl",null , UserRole.MANAGER),
-        User("u5", "Alex Silva", "admin@panal.cl", null,UserRole.ADMINISTRATOR)
+        User("u5", "Alex Silva", "admin@panal.cl", null,UserRole.ADMIN)
     )
 
     fun login(email: String, password: String): User? =

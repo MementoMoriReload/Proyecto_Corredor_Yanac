@@ -4,14 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.panalsuite.ui.Navigation.AppNavHost
 import com.example.panalsuite.ui.theme.PanalSuiteTheme
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,33 +14,14 @@ class MainActivity : ComponentActivity() {
         //onStart onResume == la pantalla se vuekve vusuvke y toma el foco
         //onPause onStop == el usuario cambio de app o bloqueo el telefono
         //onDestroy == la pantalla se cierra o el sistema lo mata
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             PanalSuiteTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                AppNavHost()
+
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PanalSuiteTheme {
-        Greeting("Android")
     }
 }

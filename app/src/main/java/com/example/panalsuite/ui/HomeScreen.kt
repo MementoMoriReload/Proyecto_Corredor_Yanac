@@ -1,7 +1,5 @@
 package com.example.panalsuite.ui
 
-import android.R.attr.text
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,17 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,83 +33,67 @@ import com.example.panalsuite.model.TicketCategory
 import com.example.panalsuite.model.TicketPriority
 import com.example.panalsuite.model.TicketStatus
 import com.example.panalsuite.model.User
+import com.example.panalsuite.model.UserRole
+import com.example.panalsuite.ui.AppTopBar
+import com.example.panalsuite.viewmodel.MenuBarViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
+
 
 @Composable
 fun HomeScreen(
     user: User,
     ticketViewModel: TicketViewModel,
     onTicketClick: (Int) -> Unit,
-    onCreateTicket: () -> Unit,
-    onOpenDashboard: () -> Unit,
-    onLogout: () -> Unit
+    onProfileClick: () -> Unit = {},
+    onDashboardClick: () -> Unit = {},
+    onManagementClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
     val tickets by ticketViewModel.tickets.collectAsState()
     val visibleTickets = remember(tickets, user) { ticketViewModel.getVisibleTickets(user) }
 
     HomeScreenContent(
-        userName = user.name,
-        roleLabel = user.role.label,
+        user = user,
         tickets = visibleTickets,
-        canCreateTicket = user.role.canCreateTicket,
-        canSeeDashboard = user.role.canSeeDashboard,
         onTicketClick = onTicketClick,
-        onCreateTicket = onCreateTicket,
-        onOpenDashboard = onOpenDashboard,
-        onLogout = onLogout
+        onProfileClick = onProfileClick,
+        onDashboardClick = onDashboardClick,
+        onManagementClick = onManagementClick,
+        onLogoutClick = onLogoutClick
     )
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
-    userName: String,
-    roleLabel: String,
+    user: User,
     tickets: List<Ticket>,
-    canCreateTicket: Boolean,
-    canSeeDashboard: Boolean,
     onTicketClick: (Int) -> Unit,
-    onCreateTicket: () -> Unit,
-    onOpenDashboard: () -> Unit,
-    onLogout: () -> Unit
+    onProfileClick: () -> Unit = {},
+    onDashboardClick: () -> Unit = {},
+    onManagementClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
+    val menuItems = remember(user.role) {
+        MenuBarViewModel.MenuItems(
+            userRole = user.role,
+            onProfileClick = onProfileClick,
+            onDashboardClick = onDashboardClick,
+            onManagementClick = onManagementClick,
+            onLogoutClick = onLogoutClick
+        )
+    }
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("PanelSuite") },
+            AppTopBar(
+                title = "Bandeja de tickets",
+                subtitle = "${user.name} · ${user.role.label}",
                 actions = {
-                    if (canSeeDashboard) {
-                        TextButton(
-                            onClick = onOpenDashboard,
-                            colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
-                        ) {
-                            Text("Resumen")
-                        }
-                    }
-                    TextButton(
-                        onClick = onLogout,
-                        colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
-                    ) {
-                        Text("Salir")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF16365D),
-                    titleContentColor = Color.White
-                )
+                    TopBarMenu(items = menuItems)
+                }
             )
-        },
-        floatingActionButton = {
-            if (canCreateTicket) {
-                ExtendedFloatingActionButton(
-                    onClick = onCreateTicket
-                )
-                { Text("Nuevo ticket") }
-
-            }
         }
-    ) { padding ->
+    ){ padding ->
         if (tickets.isEmpty()) {
             Box(
                 modifier = Modifier
@@ -129,9 +105,7 @@ fun HomeScreenContent(
             }
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
+                modifier = Modifier.padding(padding),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -233,20 +207,27 @@ private fun priorityColor(priority: TicketPriority): Color = when (priority) {
 }
 
 private fun statusColor(status: TicketStatus): Color = when (status) {
-    TicketStatus.OPEN -> Color(0xFF2E7D32)
-    TicketStatus.IN_PROGRESS -> Color(0xFFF9A825)
-    TicketStatus.PENDING -> Color(0xFFEF6C00)
-    TicketStatus.RESOLVED -> Color(0xFFC62828)
-    TicketStatus.CLOSED -> Color(0xFFC62828)
+    TicketStatus.OPEN -> Color(0xFFC62828)
+    TicketStatus.IN_PROGRESS -> Color(0xFFEF6C00)
+    TicketStatus.PENDING -> Color(0xFFF9A825)
+    TicketStatus.RESOLVED -> Color(0xFF2E7D32)
+    TicketStatus.CLOSED -> Color(0xFF2E7D32)
 
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenContentPreview() {
+    val sampleUser = User(
+        id = "u1",
+        name = "Victor Castro",
+        email = "victor@panal.cl",
+        department = null,
+        role = UserRole.REQUESTER
+    )
+
     HomeScreenContent(
-        userName = "Camila Rojas",
-        roleLabel = "Solicitante",
+        user = sampleUser,
         tickets = listOf(
             Ticket(
                 id = 1,
@@ -255,7 +236,7 @@ private fun HomeScreenContentPreview() {
                 category = TicketCategory.EXAMPLE,
                 priority = TicketPriority.HIGH,
                 status = TicketStatus.OPEN,
-                location = "ubicacion",
+                location = "Sucursal Centro",
                 requesterId = "u1",
                 assignedId = "u2",
                 createdAt = "2026-09-01",
@@ -268,32 +249,13 @@ private fun HomeScreenContentPreview() {
                 category = TicketCategory.EXAMPLE,
                 priority = TicketPriority.CRITICAL,
                 status = TicketStatus.PENDING,
-                location = "ubicacion",
+                location = "Bodega Sur",
                 requesterId = "u1",
                 assignedId = null,
                 createdAt = "2026-09-03",
                 updatedAt = "2026-09-03"
-            ),
-            Ticket(
-                id = 3,
-                title = "Stock descuadrado",
-                description = "Sin internet en bodega",
-                category = TicketCategory.EXAMPLE,
-                priority = TicketPriority.MEDIUM,
-                status = TicketStatus.IN_PROGRESS,
-                location = "ubicacion",
-                requesterId = "u1",
-                assignedId = "u2",
-                createdAt = "2026-09-02",
-                updatedAt = "2026-09-03"
             )
-
         ),
-        canCreateTicket = true,
-        canSeeDashboard = false,
-        onTicketClick = {},
-        onCreateTicket = {},
-        onOpenDashboard = {},
-        onLogout = {}
+        onTicketClick = {}
     )
 }
