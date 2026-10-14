@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class TicketViewModel(
-    private val repository: TicketRepository = TicketRepository()
 ) : ViewModel() {
+    private val repository: TicketRepository = TicketRepository()
 
     private val _tickets = MutableStateFlow(repository.getTickets())
     val tickets: StateFlow<List<Ticket>> = _tickets.asStateFlow()
