@@ -13,6 +13,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -42,7 +46,8 @@ import com.example.panalsuite.viewmodel.RegisterViewModel
 fun RegisterUserScreen(
     user: User,
     authViewModel: AuthViewModel,
-    registerViewModel: RegisterViewModel
+    registerViewModel: RegisterViewModel,
+    onRegisterSuccess: () -> Unit = {}
 ) {
     val state by registerViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -64,6 +69,7 @@ fun RegisterUserScreen(
                 )
                 if (error == null) {
                     registerViewModel.onSuccess(form.name)
+                    onRegisterSuccess()
                 } else {
                     registerViewModel.onError(error)
                 }
@@ -71,6 +77,7 @@ fun RegisterUserScreen(
         }
     )
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterUserScreenContent(
     state: RegisterUiState,
@@ -83,6 +90,8 @@ fun RegisterUserScreenContent(
     onSubmit: () -> Unit
 ){
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var roleExpanded by rememberSaveable { mutableStateOf(false) }
+
 
     val nameError = if (state.showErrors) state.nameError else null
     val emailError = if (state.showErrors) state.emailError else null
@@ -180,11 +189,36 @@ fun RegisterUserScreenContent(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                RoleRadioButton(
-                    selectedRole = state.role,
-                    onRoleSelected = onRoleChange,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
+                ExposedDropdownMenuBox(
+                    expanded = roleExpanded,
+                    onExpandedChange = { roleExpanded = !roleExpanded },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = state.role.label,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Rol de usuario") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = roleExpanded) },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = roleExpanded,
+                        onDismissRequest = { roleExpanded = false }
+                    ) {
+                        UserRole.entries.forEach { roleOption ->
+                            DropdownMenuItem(
+                                text = { Text(roleOption.label) },
+                                onClick = {
+                                    onRoleChange(roleOption)
+                                    roleExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
 
                 if (state.error != null) {
                     Text(

@@ -103,7 +103,13 @@ fun AppNavHost(
                     RegisterUserScreen(
                         user = currentUser,
                         authViewModel = authViewModel,
-                        registerViewModel = registerViewModel
+                        registerViewModel = registerViewModel,
+                        onRegisterSuccess = {
+                            navController.navigate(Routes.TICKET_LIST) {
+                                popUpTo(Routes.TICKET_LIST) { inclusive = true }
+                            }
+
+                        }
                     )
                 }
             }
