@@ -1,4 +1,3 @@
-// AppNavHost.kt
 package com.example.panalsuite.ui.Navigation
 
 import androidx.compose.foundation.layout.Box
@@ -25,8 +24,10 @@ import com.example.panalsuite.ui.AppTopBar
 import com.example.panalsuite.ui.BottomBarItem
 import com.example.panalsuite.ui.HomeScreen
 import com.example.panalsuite.ui.LoginScreen
+import com.example.panalsuite.ui.RegisterUserScreen
 import com.example.panalsuite.ui.TicketDetailScreen
 import com.example.panalsuite.viewmodel.AuthViewModel
+import com.example.panalsuite.viewmodel.RegisterViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
 
 private const val ACTION_LOGOUT = "action_logout"
@@ -49,6 +50,12 @@ fun AppNavHost(
         authViewModel.logout()
         navController.navigate(Routes.LOGIN) {
             popUpTo(0) { inclusive = true }
+        }
+    }
+
+    val toRegister: () -> Unit = {
+        navController.navigate(Routes.REGISTER) {
+            launchSingleTop = true
         }
     }
 
@@ -86,6 +93,18 @@ fun AppNavHost(
                 )
             }
 
+            composable(Routes.REGISTER) {
+                val registerViewModel: RegisterViewModel = viewModel()
+
+                user?.let { currentUser ->
+                    RegisterUserScreen(
+                        user = currentUser,
+                        authViewModel = authViewModel,
+                        registerViewModel = registerViewModel
+                    )
+                }
+            }
+
             composable(Routes.TICKET_LIST) {
                 user?.let { currentUser ->
                     HomeScreen(
@@ -94,6 +113,7 @@ fun AppNavHost(
                         onTicketClick = { id ->
                             navController.navigate(Routes.ticketDetail(id))
                         },
+                        onRegisterClick = toRegister,
                         onLogoutClick = logoutAndGoToLogin
                     )
                 }
@@ -108,30 +128,43 @@ fun AppNavHost(
                 val currentTicket = tickets.find { it.id == ticketId }
 
                 user?.let { currentUser ->
-                    TicketDetailScreen(
-                        ticket = currentTicket,
-                        user = currentUser,
-                        ticketViewModel = ticketViewModel,
-                        onBackClick = { navController.popBackStack() },
-                        onDashboardClick = {
-                            navController.navigate(Routes.DASHBOARD) {
-                                popUpTo(Routes.TICKET_LIST)
-                                launchSingleTop = true
-                            }
-                        },
-                        onLogoutClick = logoutAndGoToLogin
-                    )
+                    if (currentTicket != null) {
+                        TicketDetailScreen(
+                            ticket = currentTicket,
+                            user = currentUser,
+                            ticketViewModel = ticketViewModel,
+                            onBackClick = { navController.popBackStack() },
+                            onDashboardClick = {
+                                navController.navigate(Routes.DASHBOARD) {
+                                    popUpTo(Routes.TICKET_LIST)
+                                    launchSingleTop = true
+                                }
+                            },
+                            onLogoutClick = logoutAndGoToLogin
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("El ticket no fue encontrado")
+                        }
+                    }
                 }
             }
 
             composable(Routes.CREATE_TICKET) {
-                // TODO: reemplazar por CreateTicketScreen
-                PlaceholderScreen(title = "Nuevo ticket")
+                PlaceholderScreen(
+                    title = "Nuevo ticket",
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             composable(Routes.DASHBOARD) {
-                // TODO: reemplazar por DashboardScreen
-                PlaceholderScreen(title = "Resumen")
+                PlaceholderScreen(
+                    title = "Resumen",
+                    onBack = { navController.popBackStack() }
+                )
             }
         }
     }

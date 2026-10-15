@@ -4,13 +4,14 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.panalsuite.data.SessionManager
 import com.example.panalsuite.model.User
+import com.example.panalsuite.model.UserRole
 import com.example.panalsuite.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-private val EMAIL_REGEX = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+val EMAIL_REGEX = Regex("^[A-Za-z0-9._%+-]+@panal.cl$")
 
 data class LoginUiState(
     val email: String = "",
@@ -76,9 +77,33 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         return true
     }
 
+    fun registerUser(
+        name: String,
+        email: String,
+        password: String,
+        role: UserRole
+    ): String? {
+        if (_currentUser.value?.role?.canCreateUser != true) {
+            _loginState.update { it.copy(error = "No tienes permisos para crear usuarios") }
+            return null
+        }
+        val user = repository.register(name, email, password, role)
+        if (user == null) {
+            _loginState.update { it.copy(error = "Error al crear el usuario") }
+            return null
+        }
+        _currentUser.value = user
+        sessionManager.saveUserEmail(user.email)
+        _loginState.value = LoginUiState()
+
+        return null
+    }
+
+
     fun logout() {
         sessionManager.clearSession()
         _currentUser.value = null
         _loginState.value = LoginUiState()
     }
 }
+

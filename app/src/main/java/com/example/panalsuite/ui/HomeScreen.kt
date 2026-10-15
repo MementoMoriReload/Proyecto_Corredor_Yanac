@@ -1,5 +1,6 @@
 package com.example.panalsuite.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,10 +35,8 @@ import com.example.panalsuite.model.TicketPriority
 import com.example.panalsuite.model.TicketStatus
 import com.example.panalsuite.model.User
 import com.example.panalsuite.model.UserRole
-import com.example.panalsuite.ui.AppTopBar
 import com.example.panalsuite.viewmodel.MenuBarViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
-
 
 @Composable
 fun HomeScreen(
@@ -47,6 +46,7 @@ fun HomeScreen(
     onProfileClick: () -> Unit = {},
     onDashboardClick: () -> Unit = {},
     onManagementClick: () -> Unit = {},
+    onRegisterClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
     val tickets by ticketViewModel.tickets.collectAsState()
@@ -59,10 +59,12 @@ fun HomeScreen(
         onProfileClick = onProfileClick,
         onDashboardClick = onDashboardClick,
         onManagementClick = onManagementClick,
+        onRegisterClick = onRegisterClick,
         onLogoutClick = onLogoutClick
     )
 }
 
+@SuppressLint("RememberReturnType")
 @Composable
 fun HomeScreenContent(
     user: User,
@@ -71,6 +73,7 @@ fun HomeScreenContent(
     onProfileClick: () -> Unit = {},
     onDashboardClick: () -> Unit = {},
     onManagementClick: () -> Unit = {},
+    onRegisterClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
     val menuItems = remember(user.role) {
@@ -79,6 +82,7 @@ fun HomeScreenContent(
             onProfileClick = onProfileClick,
             onDashboardClick = onDashboardClick,
             onManagementClick = onManagementClick,
+            onRegisterClick = onRegisterClick,
             onLogoutClick = onLogoutClick
         )
     }
@@ -93,7 +97,7 @@ fun HomeScreenContent(
                 }
             )
         }
-    ){ padding ->
+    ) { padding ->
         if (tickets.isEmpty()) {
             Box(
                 modifier = Modifier
@@ -131,7 +135,8 @@ fun TicketCard(
             .clickable(onClick = onClick)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)) {
+            modifier = Modifier.padding(16.dp)
+        ) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = ticket.title,
@@ -212,7 +217,6 @@ private fun statusColor(status: TicketStatus): Color = when (status) {
     TicketStatus.PENDING -> Color(0xFFF9A825)
     TicketStatus.RESOLVED -> Color(0xFF2E7D32)
     TicketStatus.CLOSED -> Color(0xFF2E7D32)
-
 }
 
 @Preview(showBackground = true)
