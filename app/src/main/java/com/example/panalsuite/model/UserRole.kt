@@ -7,6 +7,7 @@ enum class UserRole(val label: String){
     MANAGER("Gerente"),
     ADMIN("Administrador");
 
+    val canCreateUser: Boolean get() = this == ADMIN
     val canCreateTicket: Boolean get() = this == REQUESTER || this == ADMIN
     val canChangeStatus: Boolean get() = this == RESOLVER || this == SUPERVISOR
     val canComment: Boolean get() = this != MANAGER
