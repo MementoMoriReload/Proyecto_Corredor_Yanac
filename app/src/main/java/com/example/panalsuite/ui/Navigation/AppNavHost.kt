@@ -27,6 +27,7 @@ import com.example.panalsuite.ui.HomeScreen
 import com.example.panalsuite.ui.LoginScreen
 import com.example.panalsuite.ui.TicketDetailScreen
 import com.example.panalsuite.ui.CreateTicketScreen
+import com.example.panalsuite.ui.DashboardScreen
 import com.example.panalsuite.viewmodel.AuthViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
 
@@ -141,8 +142,13 @@ fun AppNavHost(
             }
 
             composable(Routes.DASHBOARD) {
-                // TODO: reemplazar por DashboardScreen
-                PlaceholderScreen(title = "Resumen")
+                user?.let { currentUser ->
+                    DashboardScreen(
+                        user = currentUser,
+                        ticketViewModel = ticketViewModel,
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
             }
         }
     }
