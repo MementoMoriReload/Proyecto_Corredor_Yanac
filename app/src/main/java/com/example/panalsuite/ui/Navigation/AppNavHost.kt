@@ -1,3 +1,4 @@
+// AppNavHost.kt
 package com.example.panalsuite.ui.Navigation
 
 import androidx.compose.foundation.layout.Box
@@ -8,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -18,10 +20,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.panalsuite.model.User
+import com.example.panalsuite.ui.AppBottomBar
+import com.example.panalsuite.ui.AppTopBar
+import com.example.panalsuite.ui.BottomBarItem
 import com.example.panalsuite.ui.HomeScreen
 import com.example.panalsuite.ui.LoginScreen
-import com.example.panalsuite.ui.AppBottomBar
-import com.example.panalsuite.ui.BottomBarItem
 import com.example.panalsuite.ui.TicketDetailScreen
 import com.example.panalsuite.viewmodel.AuthViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
@@ -38,6 +41,17 @@ fun AppNavHost(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
+    val startDestination = remember {
+        if (authViewModel.currentUser.value != null) Routes.TICKET_LIST else Routes.LOGIN
+    }
+
+    val logoutAndGoToLogin: () -> Unit = {
+        authViewModel.logout()
+        navController.navigate(Routes.LOGIN) {
+            popUpTo(0) { inclusive = true }
+        }
+    }
+
     Scaffold(
         bottomBar = {
             AppBottomBar(
@@ -45,10 +59,7 @@ fun AppNavHost(
                 currentRoute = currentRoute,
                 onItemClick = { item ->
                     if (item.route == ACTION_LOGOUT) {
-                        authViewModel.logout()
-                        navController.navigate(Routes.LOGIN) {
-                            popUpTo(0) { inclusive = true } // vacía todo el historial
-                        }
+                        logoutAndGoToLogin()
                     } else {
                         navController.navigate(item.route) {
                             popUpTo(Routes.TICKET_LIST)
@@ -61,7 +72,7 @@ fun AppNavHost(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.LOGIN,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.LOGIN) {
@@ -82,7 +93,8 @@ fun AppNavHost(
                         ticketViewModel = ticketViewModel,
                         onTicketClick = { id ->
                             navController.navigate(Routes.ticketDetail(id))
-                        }
+                        },
+                        onLogoutClick = logoutAndGoToLogin
                     )
                 }
             }
@@ -107,12 +119,7 @@ fun AppNavHost(
                                 launchSingleTop = true
                             }
                         },
-                        onLogoutClick = {
-                            authViewModel.logout()
-                            navController.navigate(Routes.LOGIN) {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        }
+                        onLogoutClick = logoutAndGoToLogin
                     )
                 }
             }
@@ -130,10 +137,6 @@ fun AppNavHost(
     }
 }
 
-/**
- * Qué opciones muestra el menú según la sesión y el rol.
- * Las reglas salen de UserRole, así no se duplican aquí.
- */
 private fun menuItemsFor(user: User?): List<BottomBarItem> {
     if (user == null) {
         return listOf(BottomBarItem(Routes.LOGIN, "Iniciar sesión"))
@@ -143,7 +146,6 @@ private fun menuItemsFor(user: User?): List<BottomBarItem> {
             BottomBarItem(
                 route = Routes.TICKET_LIST,
                 label = "Bandeja",
-                // También queda activa mientras se ve el detalle de un ticket
                 selectedRoutes = listOf(Routes.TICKET_LIST, Routes.TICKET_DETAIL)
             )
         )
@@ -157,14 +159,13 @@ private fun menuItemsFor(user: User?): List<BottomBarItem> {
     }
 }
 
-/** Pantalla provisoria para poder navegar mientras se construyen las reales. */
 @Composable
 private fun PlaceholderScreen(
     title: String,
     onBack: (() -> Unit)? = null
 ) {
     Scaffold(
-        topBar = { TopBar(title = title, onBackClick = onBack) }
+        topBar = { AppTopBar(title = title, onBackClick = onBack) }
     ) { padding ->
         Box(
             modifier = Modifier
@@ -175,9 +176,4 @@ private fun PlaceholderScreen(
             Text("Pantalla en construcción")
         }
     }
-}
-
-@Composable
-fun TopBar(title: String, onBackClick: (() -> Unit)?) {
-    TODO("Not yet implemented")
 }

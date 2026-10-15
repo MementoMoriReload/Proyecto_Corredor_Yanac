@@ -1,4 +1,3 @@
-// AuthViewModel.kt
 package com.example.panalsuite.viewmodel
 
 import android.app.Application
@@ -43,6 +42,13 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _loginState = MutableStateFlow(LoginUiState())
     val loginState: StateFlow<LoginUiState> = _loginState.asStateFlow()
+
+    init {
+        sessionManager.getUserEmail()?.let { savedEmail ->
+            _currentUser.value = repository.findByEmail(savedEmail)
+            if (_currentUser.value == null) sessionManager.clearSession()
+        }
+    }
 
     fun onEmailChange(value: String) {
         _loginState.update { it.copy(email = value, error = null) }

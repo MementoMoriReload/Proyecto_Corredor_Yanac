@@ -14,4 +14,7 @@ class AuthRepository{
 
     fun login(email: String, password: String): User? =
         users.firstOrNull { it.email == email.trim() && password == "1234" }
+
+    fun findByEmail(email: String): User? =
+        users.firstOrNull { it.email == email.trim() }
 }
