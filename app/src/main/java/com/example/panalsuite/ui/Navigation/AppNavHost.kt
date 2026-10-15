@@ -26,6 +26,7 @@ import com.example.panalsuite.ui.BottomBarItem
 import com.example.panalsuite.ui.HomeScreen
 import com.example.panalsuite.ui.LoginScreen
 import com.example.panalsuite.ui.TicketDetailScreen
+import com.example.panalsuite.ui.CreateTicketScreen
 import com.example.panalsuite.viewmodel.AuthViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
 
@@ -125,8 +126,18 @@ fun AppNavHost(
             }
 
             composable(Routes.CREATE_TICKET) {
-                // TODO: reemplazar por CreateTicketScreen
-                PlaceholderScreen(title = "Nuevo ticket")
+                user?.let { currentUser ->
+                    CreateTicketScreen(
+                        user = currentUser,
+                        ticketViewModel = ticketViewModel,
+                        onBackClick = { navController.popBackStack() },
+                        onTicketCreated = {
+                            navController.navigate(Routes.TICKET_LIST) {
+                                popUpTo(Routes.TICKET_LIST) { inclusive = true }
+                            }
+                        }
+                    )
+                }
             }
 
             composable(Routes.DASHBOARD) {

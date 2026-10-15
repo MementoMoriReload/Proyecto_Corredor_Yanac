@@ -4,12 +4,15 @@ import androidx.lifecycle.ViewModel
 import com.example.panalsuite.model.Ticket
 import com.example.panalsuite.model.TicketComment
 import com.example.panalsuite.model.TicketStatus
+import com.example.panalsuite.model.TicketCategory
+import com.example.panalsuite.model.TicketPriority
 import com.example.panalsuite.model.User
 import com.example.panalsuite.model.UserRole
 import com.example.panalsuite.repository.TicketRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.time.LocalDate
 
 class TicketViewModel(
 ) : ViewModel() {
@@ -44,5 +47,35 @@ class TicketViewModel(
                 )
             )
         }
+    }
+
+    fun createTicket(
+        title: String,
+        description: String,
+        category: TicketCategory,
+        priority: TicketPriority,
+        location: String,
+        requesterId: String
+    ) {
+        val currentTickets = _tickets.value
+        val newId = (currentTickets.maxOfOrNull { it.id } ?: 0) + 1
+        val currentDate = LocalDate.now().toString() // Genera la fecha actual automáticamente (ej. "2026-10-15")
+
+        val newTicket = Ticket(
+            id = newId,
+            title = title.trim(),
+            description = description.trim(),
+            category = category,
+            priority = priority,
+            status = TicketStatus.OPEN,
+            location = location.trim(),
+            requesterId = requesterId,
+            assignedId = null,
+            comments = emptyList(),
+            createdAt = currentDate,
+            updatedAt = currentDate
+        )
+
+        _tickets.value = currentTickets + newTicket
     }
 }
