@@ -1,3 +1,4 @@
+// AppNavHost.kt
 package com.example.panalsuite.ui.Navigation
 
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,8 @@ import com.example.panalsuite.ui.HomeScreen
 import com.example.panalsuite.ui.LoginScreen
 import com.example.panalsuite.ui.RegisterUserScreen
 import com.example.panalsuite.ui.TicketDetailScreen
+import com.example.panalsuite.ui.CreateTicketScreen
+import com.example.panalsuite.ui.DashboardScreen
 import com.example.panalsuite.viewmodel.AuthViewModel
 import com.example.panalsuite.viewmodel.RegisterViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
@@ -128,43 +131,45 @@ fun AppNavHost(
                 val currentTicket = tickets.find { it.id == ticketId }
 
                 user?.let { currentUser ->
-                    if (currentTicket != null) {
-                        TicketDetailScreen(
-                            ticket = currentTicket,
-                            user = currentUser,
-                            ticketViewModel = ticketViewModel,
-                            onBackClick = { navController.popBackStack() },
-                            onDashboardClick = {
-                                navController.navigate(Routes.DASHBOARD) {
-                                    popUpTo(Routes.TICKET_LIST)
-                                    launchSingleTop = true
-                                }
-                            },
-                            onLogoutClick = logoutAndGoToLogin
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("El ticket no fue encontrado")
-                        }
-                    }
+                    TicketDetailScreen(
+                        ticket = currentTicket,
+                        user = currentUser,
+                        ticketViewModel = ticketViewModel,
+                        onBackClick = { navController.popBackStack() },
+                        onDashboardClick = {
+                            navController.navigate(Routes.DASHBOARD) {
+                                popUpTo(Routes.TICKET_LIST)
+                                launchSingleTop = true
+                            }
+                        },
+                        onLogoutClick = logoutAndGoToLogin
+                    )
                 }
             }
 
             composable(Routes.CREATE_TICKET) {
-                PlaceholderScreen(
-                    title = "Nuevo ticket",
-                    onBack = { navController.popBackStack() }
-                )
+                user?.let { currentUser ->
+                    CreateTicketScreen(
+                        user = currentUser,
+                        ticketViewModel = ticketViewModel,
+                        onBackClick = { navController.popBackStack() },
+                        onTicketCreated = {
+                            navController.navigate(Routes.TICKET_LIST) {
+                                popUpTo(Routes.TICKET_LIST) { inclusive = true }
+                            }
+                        }
+                    )
+                }
             }
 
             composable(Routes.DASHBOARD) {
-                PlaceholderScreen(
-                    title = "Resumen",
-                    onBack = { navController.popBackStack() }
-                )
+                user?.let { currentUser ->
+                    DashboardScreen(
+                        user = currentUser,
+                        ticketViewModel = ticketViewModel,
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
             }
         }
     }
