@@ -43,11 +43,9 @@ fun HomeScreen(
     user: User,
     ticketViewModel: TicketViewModel,
     onTicketClick: (Int) -> Unit,
-    onProfileClick: () -> Unit = {},
     onDashboardClick: () -> Unit = {},
     onManagementClick: () -> Unit = {},
     onRegisterClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
 ) {
     val tickets by ticketViewModel.tickets.collectAsState()
     val visibleTickets = remember(tickets, user) { ticketViewModel.getVisibleTickets(user) }
@@ -56,11 +54,9 @@ fun HomeScreen(
         user = user,
         tickets = visibleTickets,
         onTicketClick = onTicketClick,
-        onProfileClick = onProfileClick,
         onDashboardClick = onDashboardClick,
         onManagementClick = onManagementClick,
         onRegisterClick = onRegisterClick,
-        onLogoutClick = onLogoutClick
     )
 }
 
@@ -70,20 +66,16 @@ fun HomeScreenContent(
     user: User,
     tickets: List<Ticket>,
     onTicketClick: (Int) -> Unit,
-    onProfileClick: () -> Unit = {},
     onDashboardClick: () -> Unit = {},
     onManagementClick: () -> Unit = {},
     onRegisterClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
 ) {
     val menuItems = remember(user.role) {
         MenuBarViewModel.MenuItems(
             userRole = user.role,
-            onProfileClick = onProfileClick,
             onDashboardClick = onDashboardClick,
             onManagementClick = onManagementClick,
             onRegisterClick = onRegisterClick,
-            onLogoutClick = onLogoutClick
         )
     }
 

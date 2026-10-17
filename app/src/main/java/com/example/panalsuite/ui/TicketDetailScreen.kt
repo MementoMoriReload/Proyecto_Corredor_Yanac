@@ -37,7 +37,6 @@ fun TicketDetailScreen(
     user: User,
     ticketViewModel: TicketViewModel,
     onBackClick: () -> Unit,
-    onProfileClick: () -> Unit = {},
     onDashboardClick: () -> Unit = {},
     onManagementClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
@@ -68,7 +67,6 @@ fun TicketDetailScreen(
             ticket = ticket,
             user = user,
             onBackClick = onBackClick,
-            onProfileClick = onProfileClick,
             onDashboardClick = onDashboardClick,
             onManagementClick = onManagementClick,
             onLogoutClick = onLogoutClick
@@ -81,7 +79,6 @@ fun TicketDetailScreenContent(
     ticket: Ticket,
     user: User,
     onBackClick: () -> Unit,
-    onProfileClick: () -> Unit,
     onDashboardClick: () -> Unit,
     onManagementClick: () -> Unit,
     onLogoutClick: () -> Unit
@@ -89,10 +86,8 @@ fun TicketDetailScreenContent(
     val menuItems = remember(user.role) {
         MenuBarViewModel.MenuItems(
             userRole = user.role,
-            onProfileClick = onProfileClick,
             onDashboardClick = onDashboardClick,
-            onManagementClick = onManagementClick,
-            onLogoutClick = onLogoutClick
+            onManagementClick = onManagementClick
         )
     }
 
@@ -243,7 +238,6 @@ private fun TicketDetailScreenPreview() {
         ticket = sampleTicket,
         user = sampleUser,
         onBackClick = {},
-        onProfileClick = {},
         onDashboardClick = {},
         onManagementClick = {},
         onLogoutClick= {}

@@ -5,15 +5,11 @@ import com.example.panalsuite.model.UserRole
 object MenuBarViewModel {
     fun MenuItems(
         userRole: UserRole,
-        onProfileClick: () -> Unit = {},
         onDashboardClick: () -> Unit = {},
         onManagementClick: () -> Unit = {},
         onRegisterClick: () -> Unit = {},
-        onLogoutClick: () -> Unit = {}
     ): List<Pair<String, () -> Unit>> {
         val items = mutableListOf<Pair<String, () -> Unit>>()
-
-        items.add("Perfil" to onProfileClick)
 
         when (userRole) {
             UserRole.ADMIN -> {
@@ -30,8 +26,6 @@ object MenuBarViewModel {
                 // El solicitante solo mantiene las opciones por defecto
             }
         }
-
-        items.add("Cerrar sesión" to onLogoutClick)
 
         return items
     }

@@ -63,7 +63,7 @@ fun DashboardScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = "Indicadores Principales (KPIs)",
@@ -108,7 +108,7 @@ fun DashboardScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Sección: Distribución por Estado (Barras de progreso)
             Card(

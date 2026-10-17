@@ -56,6 +56,13 @@ fun AppNavHost(
         }
     }
 
+    val toDashboard: () -> Unit = {
+      navController.navigate(Routes.DASHBOARD){
+          popUpTo(Routes.TICKET_LIST)
+          launchSingleTop = true
+      }
+    }
+
     val toRegister: () -> Unit = {
         navController.navigate(Routes.REGISTER) {
             launchSingleTop = true
@@ -122,8 +129,8 @@ fun AppNavHost(
                         onTicketClick = { id ->
                             navController.navigate(Routes.ticketDetail(id))
                         },
-                        onRegisterClick = toRegister,
-                        onLogoutClick = logoutAndGoToLogin
+                        onDashboardClick = toDashboard,
+                        onRegisterClick = toRegister
                     )
                 }
             }
@@ -148,7 +155,6 @@ fun AppNavHost(
                                 launchSingleTop = true
                             }
                         },
-                        onLogoutClick = logoutAndGoToLogin
                     )
                 }
             }
