@@ -18,8 +18,14 @@ object MenuBarViewModel {
                 items.add("Registrar Usuario" to onRegisterClick)
             }
 
-            UserRole.RESOLVER, UserRole.SUPERVISOR, UserRole.MANAGER -> {
+            UserRole.RESOLVER, UserRole.SUPERVISOR -> {
                 items.add("Dashboard" to onDashboardClick)
+            }
+
+            UserRole.MANAGER -> {
+                items.add("Dashboard" to onDashboardClick)
+                items.add("Gestión de Usuarios" to onManagementClick)
+
             }
 
             UserRole.REQUESTER -> {

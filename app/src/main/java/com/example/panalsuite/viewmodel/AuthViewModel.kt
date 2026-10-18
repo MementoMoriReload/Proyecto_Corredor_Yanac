@@ -44,6 +44,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _loginState = MutableStateFlow(LoginUiState())
     val loginState: StateFlow<LoginUiState> = _loginState.asStateFlow()
 
+    private val _users = MutableStateFlow<List<User>>(repository.getUsers())
+    val users: StateFlow<List<User>> = _users.asStateFlow()
+
     init {
         sessionManager.getUserEmail()?.let { savedEmail ->
             _currentUser.value = repository.findByEmail(savedEmail)
@@ -84,21 +87,30 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         role: UserRole
     ): String? {
         if (_currentUser.value?.role?.canCreateUser != true) {
-            _loginState.update { it.copy(error = "No tienes permisos para crear usuarios") }
-            return null
+            return "No tienes permisos para crear usuarios"
         }
-        val user = repository.register(name, email, password, role)
-        if (user == null) {
-            _loginState.update { it.copy(error = "Error al crear el usuario") }
-            return null
-        }
-        _currentUser.value = user
-        sessionManager.saveUserEmail(user.email)
-        _loginState.value = LoginUiState()
+
+
+        val newUser = repository.register(name, email, password, role)
+            ?:return "Error al crear el usuario"
+
+        _users.update { repository.getUsers() }
 
         return null
+
     }
 
+
+    fun updateUserRole(userId: String, newRole: UserRole) {
+        val success = repository.updateUserRole(userId, newRole)
+        if (success){
+            _users.update { repository.getUsers() }
+
+            if (_currentUser.value?.id == userId){
+                _currentUser.update {it?.copy(role = newRole)}
+            }
+        }
+    }
 
     fun logout() {
         sessionManager.clearSession()

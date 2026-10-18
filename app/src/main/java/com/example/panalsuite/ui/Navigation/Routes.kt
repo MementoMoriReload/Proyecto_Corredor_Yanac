@@ -1,4 +1,4 @@
-package com.example.panalsuite.ui.Navigation
+package com.example.panalsuite.ui.navigation
 
 object Routes {
     const val LOGIN = "login"
@@ -7,6 +7,8 @@ object Routes {
     const val TICKET_DETAIL = "ticketDetail/{ticketId}"
     const val CREATE_TICKET = "createTicket"
     const val DASHBOARD = "dashboard"
+
+    const val MANAGEMENT = "Management"
 
     fun ticketDetail(ticketId: Int) = "ticketDetail/$ticketId"
 }

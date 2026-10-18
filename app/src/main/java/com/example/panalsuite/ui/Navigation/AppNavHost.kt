@@ -1,16 +1,11 @@
-// AppNavHost.kt
-package com.example.panalsuite.ui.Navigation
+package com.example.panalsuite.ui.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -21,14 +16,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.panalsuite.model.User
 import com.example.panalsuite.ui.AppBottomBar
-import com.example.panalsuite.ui.AppTopBar
 import com.example.panalsuite.ui.BottomBarItem
+import com.example.panalsuite.ui.CreateTicketScreen
+import com.example.panalsuite.ui.DashboardScreen
 import com.example.panalsuite.ui.HomeScreen
 import com.example.panalsuite.ui.LoginScreen
 import com.example.panalsuite.ui.RegisterUserScreen
 import com.example.panalsuite.ui.TicketDetailScreen
-import com.example.panalsuite.ui.CreateTicketScreen
-import com.example.panalsuite.ui.DashboardScreen
+import com.example.panalsuite.ui.UserManagementScreen
 import com.example.panalsuite.viewmodel.AuthViewModel
 import com.example.panalsuite.viewmodel.RegisterViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
@@ -52,15 +47,15 @@ fun AppNavHost(
     val logoutAndGoToLogin: () -> Unit = {
         authViewModel.logout()
         navController.navigate(Routes.LOGIN) {
-            popUpTo(0) { inclusive = true }
+            popUpTo(route = Routes.LOGIN) { inclusive = true }
         }
     }
 
     val toDashboard: () -> Unit = {
-      navController.navigate(Routes.DASHBOARD){
-          popUpTo(Routes.TICKET_LIST)
-          launchSingleTop = true
-      }
+        navController.navigate(Routes.DASHBOARD) {
+            popUpTo(route = Routes.TICKET_LIST)
+            launchSingleTop = true
+        }
     }
 
     val toRegister: () -> Unit = {
@@ -69,23 +64,31 @@ fun AppNavHost(
         }
     }
 
+    val toManagement: () -> Unit = {
+        navController.navigate(Routes.MANAGEMENT) {
+            launchSingleTop = true
+        }
+    }
+
     Scaffold(
         bottomBar = {
-            AppBottomBar(
-                items = menuItemsFor(user),
-                currentRoute = currentRoute,
-                onItemClick = { item ->
-                    if (item.route == ACTION_LOGOUT) {
-                        logoutAndGoToLogin()
-                    } else {
-                        navController.navigate(item.route) {
-                            popUpTo(Routes.TICKET_LIST)
-                            launchSingleTop = true
+            if (currentRoute != Routes.LOGIN) {
+                AppBottomBar(
+                    items = menuItemsFor(user),
+                    currentRoute = currentRoute,
+                    onItemClick = { (route) ->
+                        if (route == ACTION_LOGOUT) {
+                            logoutAndGoToLogin()
+                        } else {
+                            navController.navigate(route) {
+                                popUpTo(route = Routes.TICKET_LIST)
+                                launchSingleTop = true
+                            }
                         }
-                    }
-                }
-            )
-        }
+                    },
+                )
+            }
+        },
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -93,14 +96,11 @@ fun AppNavHost(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.LOGIN) {
-                LoginScreen(
-                    authViewModel = authViewModel,
-                    onLoginSuccess = {
-                        navController.navigate(Routes.TICKET_LIST) {
-                            popUpTo(Routes.LOGIN) { inclusive = true }
-                        }
+                LoginScreen(authViewModel = authViewModel) {
+                    navController.navigate(Routes.TICKET_LIST) {
+                        popUpTo(route = Routes.LOGIN) { inclusive = true }
                     }
-                )
+                }
             }
 
             composable(Routes.REGISTER) {
@@ -113,9 +113,8 @@ fun AppNavHost(
                         registerViewModel = registerViewModel,
                         onRegisterSuccess = {
                             navController.navigate(Routes.TICKET_LIST) {
-                                popUpTo(Routes.TICKET_LIST) { inclusive = true }
+                                popUpTo(route = Routes.TICKET_LIST) { inclusive = true }
                             }
-
                         }
                     )
                 }
@@ -130,6 +129,7 @@ fun AppNavHost(
                             navController.navigate(Routes.ticketDetail(id))
                         },
                         onDashboardClick = toDashboard,
+                        onManagementClick = toManagement,
                         onRegisterClick = toRegister
                     )
                 }
@@ -149,12 +149,9 @@ fun AppNavHost(
                         user = currentUser,
                         ticketViewModel = ticketViewModel,
                         onBackClick = { navController.popBackStack() },
-                        onDashboardClick = {
-                            navController.navigate(Routes.DASHBOARD) {
-                                popUpTo(Routes.TICKET_LIST)
-                                launchSingleTop = true
-                            }
-                        },
+                        onDashboardClick = toDashboard,
+                        onManagementClick = toManagement,
+                        onLogoutClick = logoutAndGoToLogin
                     )
                 }
             }
@@ -164,13 +161,12 @@ fun AppNavHost(
                     CreateTicketScreen(
                         user = currentUser,
                         ticketViewModel = ticketViewModel,
-                        onBackClick = { navController.popBackStack() },
-                        onTicketCreated = {
-                            navController.navigate(Routes.TICKET_LIST) {
-                                popUpTo(Routes.TICKET_LIST) { inclusive = true }
-                            }
+                        onBackClick = { navController.popBackStack() }
+                    ) {
+                        navController.navigate(Routes.TICKET_LIST) {
+                            popUpTo(route = Routes.TICKET_LIST) { inclusive = true }
                         }
-                    )
+                    }
                 }
             }
 
@@ -179,7 +175,21 @@ fun AppNavHost(
                     DashboardScreen(
                         user = currentUser,
                         ticketViewModel = ticketViewModel,
-                        onBackClick = { navController.popBackStack() }
+                    ) { navController.popBackStack() }
+                }
+            }
+
+            composable(Routes.MANAGEMENT) {
+                val usersList by authViewModel.users.collectAsState()
+
+                user?.let { currentUser ->
+                    UserManagementScreen(
+                        user = currentUser,
+                        userList = usersList,
+                        onBackClick = { navController.popBackStack() },
+                        onRoleChange = { targetUser, newRole ->
+                            authViewModel.updateUserRole(targetUser.id, newRole)
+                        }
                     )
                 }
             }
@@ -189,14 +199,14 @@ fun AppNavHost(
 
 private fun menuItemsFor(user: User?): List<BottomBarItem> {
     if (user == null) {
-        return listOf(BottomBarItem(Routes.LOGIN, "Iniciar sesión"))
+        return emptyList()
     }
     return buildList {
         add(
             BottomBarItem(
                 route = Routes.TICKET_LIST,
                 label = "Bandeja",
-                selectedRoutes = listOf(Routes.TICKET_LIST, Routes.TICKET_DETAIL)
+                selectedRoutes = listOf(Routes.TICKET_LIST, Routes.TICKET_DETAIL),
             )
         )
         if (user.role.canCreateTicket) {
@@ -206,24 +216,5 @@ private fun menuItemsFor(user: User?): List<BottomBarItem> {
             add(BottomBarItem(Routes.DASHBOARD, "Resumen"))
         }
         add(BottomBarItem(ACTION_LOGOUT, "Salir"))
-    }
-}
-
-@Composable
-private fun PlaceholderScreen(
-    title: String,
-    onBack: (() -> Unit)? = null
-) {
-    Scaffold(
-        topBar = { AppTopBar(title = title, onBackClick = onBack) }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Pantalla en construcción")
-        }
     }
 }

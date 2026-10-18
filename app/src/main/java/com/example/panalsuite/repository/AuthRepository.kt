@@ -31,4 +31,16 @@ class AuthRepository{
 
     fun findByEmail(email: String): User? =
         users.firstOrNull { it.email == email.trim() }
+
+    fun getUsers(): List<User> = users.toList()
+
+    fun updateUserRole(userId: String, newRole: UserRole): Boolean {
+        val index = users.indexOfFirst { it.id == userId }
+        return if (index != -1) {
+            users[index] = users[index].copy(role = newRole)
+            true
+        } else {
+            false
+        }
+    }
 }

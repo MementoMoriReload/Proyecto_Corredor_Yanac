@@ -12,6 +12,7 @@ import com.example.panalsuite.repository.TicketRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.time.LocalDate
 
 class TicketViewModel(
@@ -35,17 +36,40 @@ class TicketViewModel(
         }
     }
 
+    fun closeTicket(ticketId: Int){
+        _tickets.update{ list ->
+            list.map { ticket ->
+                if (ticket.id == ticketId) {
+                    ticket.copy(
+                        status = TicketStatus.CLOSED,
+                        updatedAt = LocalDate.now().toString()
+                    )
+                } else {
+                    ticket
+                }
+            }
+        }
+    }
+
     fun addComment(ticketId: Int, author: String, text: String) {
-        _tickets.value = _tickets.value.map { ticket ->
-            if (ticket.id != ticketId) ticket
-            else ticket.copy(
-                comments = ticket.comments + TicketComment(
-                    id = ticket.comments.size + 1,
-                    author = author,
-                    text = text.trim(),
-                    timestamp = "ahora"
-                )
-            )
+        if (text.isBlank()) return
+
+        val comment = TicketComment(
+            id = _tickets.value.maxOfOrNull { it.id }?.plus(1) ?: 1,
+            author = author,
+            text = text.trim(),
+            timestamp = LocalDate.now().toString()
+        )
+
+        _tickets.update { list ->
+            list.map{ ticket ->
+                if (ticket.id == ticketId) {
+                    ticket.copy(
+                        comments = ticket.comments + comment,
+                        updatedAt = LocalDate.now().toString()
+                    )
+                } else ticket
+            }
         }
     }
 
