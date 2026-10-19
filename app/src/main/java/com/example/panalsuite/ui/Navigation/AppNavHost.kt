@@ -21,6 +21,7 @@ import com.example.panalsuite.ui.CreateTicketScreen
 import com.example.panalsuite.ui.DashboardScreen
 import com.example.panalsuite.ui.HomeScreen
 import com.example.panalsuite.ui.LoginScreen
+import com.example.panalsuite.ui.ProfileScreen
 import com.example.panalsuite.ui.RegisterUserScreen
 import com.example.panalsuite.ui.TicketDetailScreen
 import com.example.panalsuite.ui.UserManagementScreen
@@ -130,7 +131,23 @@ fun AppNavHost(
                         },
                         onDashboardClick = toDashboard,
                         onManagementClick = toManagement,
-                        onRegisterClick = toRegister
+                        onRegisterClick = toRegister,
+                        onProfileClick = {
+                            navController.navigate(Routes.PROFILE) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onLogoutClick = logoutAndGoToLogin
+                    )
+                }
+            }
+
+            composable(Routes.PROFILE) {
+                user?.let { currentUser ->
+                    ProfileScreen(
+                        user = currentUser,
+                        onBackClick = { navController.popBackStack() },
+                        onLogoutClick = logoutAndGoToLogin
                     )
                 }
             }
@@ -175,7 +192,14 @@ fun AppNavHost(
                     DashboardScreen(
                         user = currentUser,
                         ticketViewModel = ticketViewModel,
-                    ) { navController.popBackStack() }
+                        onBackClick = { navController.popBackStack() },
+                        onProfileClick = {
+                            navController.navigate(Routes.PROFILE) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onLogoutClick = logoutAndGoToLogin
+                    )
                 }
             }
 

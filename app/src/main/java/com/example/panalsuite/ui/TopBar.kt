@@ -106,7 +106,7 @@ fun TopBarMenu(
                     text = { Text(text = title) },
                     onClick = {
                         expanded = false
-                        onClickAction()
+                        onClickAction.invoke()
                     }
                 )
             }

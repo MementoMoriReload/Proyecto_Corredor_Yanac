@@ -9,6 +9,7 @@ object Routes {
     const val DASHBOARD = "dashboard"
 
     const val MANAGEMENT = "Management"
+    const val  PROFILE = "profile"
 
     fun ticketDetail(ticketId: Int) = "ticketDetail/$ticketId"
 }

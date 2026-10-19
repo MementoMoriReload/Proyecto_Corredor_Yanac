@@ -8,6 +8,8 @@ object MenuBarViewModel {
         onDashboardClick: () -> Unit = {},
         onManagementClick: () -> Unit = {},
         onRegisterClick: () -> Unit = {},
+        onProfileClick: () -> Unit = {},
+        onLogoutClick: () -> Unit = {},
     ): List<Pair<String, () -> Unit>> {
         val items = mutableListOf<Pair<String, () -> Unit>>()
 
@@ -18,20 +20,16 @@ object MenuBarViewModel {
                 items.add("Registrar Usuario" to onRegisterClick)
             }
 
-            UserRole.RESOLVER, UserRole.SUPERVISOR -> {
+            UserRole.RESOLVER, UserRole.SUPERVISOR, UserRole.MANAGER -> {
                 items.add("Dashboard" to onDashboardClick)
+                if (userRole == UserRole.MANAGER) items.add("Gestion de Usuario" to onManagementClick)
             }
 
-            UserRole.MANAGER -> {
-                items.add("Dashboard" to onDashboardClick)
-                items.add("Gestión de Usuarios" to onManagementClick)
-
-            }
-
-            UserRole.REQUESTER -> {
-                // El solicitante solo mantiene las opciones por defecto
-            }
+            UserRole.REQUESTER -> { }
         }
+
+        items.add("Perfil" to onProfileClick)
+        items.add("Cerrar sesíon" to onLogoutClick)
 
         return items
     }

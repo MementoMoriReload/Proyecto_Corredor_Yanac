@@ -36,7 +36,9 @@ import com.example.panalsuite.viewmodel.TicketViewModel
 fun DashboardScreen(
     user: User,
     ticketViewModel: TicketViewModel,
-    onBackClick: (() -> Unit)? = null
+    onBackClick: () -> Unit,
+    onProfileClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
     val tickets by ticketViewModel.tickets.collectAsState()
 
