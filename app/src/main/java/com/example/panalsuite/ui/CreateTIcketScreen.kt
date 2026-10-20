@@ -31,6 +31,8 @@ fun CreateTicketScreen(
 
     var showError by remember { mutableStateOf(false) }
     var priorityExpanded by remember { mutableStateOf(false) }
+    var categoryExpanded by remember { mutableStateOf(false) }
+
 
     Scaffold(
         topBar = {
@@ -91,6 +93,36 @@ fun CreateTicketScreen(
                 isError = showError && location.isBlank(),
                 modifier = Modifier.fillMaxWidth()
             )
+
+            ExposedDropdownMenuBox(
+                expanded = categoryExpanded,
+                onExpandedChange = { categoryExpanded = !categoryExpanded }
+            ) {
+                OutlinedTextField(
+                    value = category.label,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Categoria") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = categoryExpanded,
+                    onDismissRequest = { categoryExpanded = false }
+                ) {
+                    TicketCategory.entries.forEach { categoryOption ->
+                        DropdownMenuItem(
+                            text = { Text(categoryOption.label) },
+                            onClick = {
+                                category = categoryOption
+                                categoryExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
 
             // Desplegable de Prioridad
             ExposedDropdownMenuBox(
