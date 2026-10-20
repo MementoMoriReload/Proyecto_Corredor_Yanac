@@ -2,14 +2,17 @@ package com.example.panalsuite.repository
 
 import com.example.panalsuite.model.User
 import com.example.panalsuite.model.UserRole
+import com.example.panalsuite.network.ApiClient
+import com.example.panalsuite.network.ApiService
+import com.example.panalsuite.network.LoginRequest
 
-class AuthRepository{
+class AuthRepository( private val apiService: ApiService = ApiClient.service) {
     private val users = mutableListOf(
-        User("u1", "Victor Castro", "victor@panal.cl",null, UserRole.REQUESTER),
-        User("u2", "Martin Contreras", "martin@panal.cl",null, UserRole.RESOLVER),
-        User("u3", "Marta Hernandez", "marta@panal.cl",null, UserRole.SUPERVISOR),
-        User("u4", "Helena Vera", "helena@panal.cl",null , UserRole.MANAGER),
-        User("u5", "Alex Silva", "admin@panal.cl", null,UserRole.ADMIN)
+        User("u1", "Victor Castro", "victor@panal.cl", null, UserRole.REQUESTER),
+        User("u2", "Martin Contreras", "martin@panal.cl", null, UserRole.RESOLVER),
+        User("u3", "Marta Hernandez", "marta@panal.cl", null, UserRole.SUPERVISOR),
+        User("u4", "Helena Vera", "helena@panal.cl", null, UserRole.MANAGER),
+        User("u5", "Alex Silva", "admin@panal.cl", null, UserRole.ADMIN)
     )
 
     private val passwords = mutableMapOf(
@@ -20,7 +23,24 @@ class AuthRepository{
         "u5" to "1234"
     )
 
-    fun login(email: String, password: String): User? {
+    suspend fun Apilogin(email: String, password: String): User? {
+        val cleanEmail = email.trim()
+
+        return try {
+            val response = apiService.login(LoginRequest(cleanEmail, password))
+
+            if (response.isSuccessful && response.body() != null) {
+                response.body()
+            } else {
+                login(cleanEmail, password)
+            }
+        } catch (e: Exception) {
+            login(cleanEmail, password)
+        }
+    }
+
+
+    private fun login(email: String, password: String): User? {
         val user = findByEmail(email)?: return null
         return if (passwords[user.id] == password) user else null
     }

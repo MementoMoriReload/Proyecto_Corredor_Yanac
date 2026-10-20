@@ -34,7 +34,7 @@ class TicketRepository {
             title = "Stock descuadrado",
             description = "Diferencia entre las unidades del inventario físico con el stock del sistema.",
             category = TicketCategory.INVENTORY_STOCK,
-            priority = TicketPriority.MEDIUM,
+            priority = TicketPriority.LOW,
             status = TicketStatus.IN_PROGRESS,
             location = "ejemplo",
             requesterId = "u1",
@@ -44,9 +44,22 @@ class TicketRepository {
         ),
         Ticket(
             id = 3,
-            title = "Falla de conexión",
-            description = "Sin internet ni comunicación en la caja 2.",
+            title = "Lector de precio no funciona",
+            description = "Lector de precio no enciende.",
             category = TicketCategory.STORE_INFRASTRUCTURE,
+            priority = TicketPriority.MEDIUM,
+            status = TicketStatus.PENDING,
+            location = "ejemplo",
+            requesterId = "u1",
+            assignedId = null,
+            createdAt = "2026-09-03 11:45",
+            updatedAt = "2026-09-03 11:45"
+        ),
+        Ticket(
+            id = 4,
+            title = "Equipo no enciende",
+            description = "Caja 4 no enciende.",
+            category = TicketCategory.INTERNAL_SUPPORT,
             priority = TicketPriority.CRITICAL,
             status = TicketStatus.PENDING,
             location = "ejemplo",
@@ -54,8 +67,21 @@ class TicketRepository {
             assignedId = null,
             createdAt = "2026-09-03 11:45",
             updatedAt = "2026-09-03 11:45"
+        ),
+        Ticket(
+            id = 5,
+            title = "Producto no registrado",
+            description = "Cliente necesita devolver producto en tienda.",
+            category = TicketCategory.CUSTOMER_SERVICE,
+            priority = TicketPriority.HIGH,
+            status = TicketStatus.OPEN,
+            location = "ejemplo",
+            requesterId = "u1",
+            assignedId = "u2",
+            createdAt = "2026-09-03 13:00",
+            updatedAt = "2026-09-03 13:00"
+            )
         )
-    )
 
     fun getTickets(): List<Ticket> = tickets.toList()
 }

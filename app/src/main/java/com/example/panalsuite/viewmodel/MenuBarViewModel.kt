@@ -29,9 +29,6 @@ object MenuBarViewModel {
 
             UserRole.REQUESTER -> { }
         }
-
-        items.add("Cerrar sesíon" to onLogoutClick)
-
         return items
     }
 }

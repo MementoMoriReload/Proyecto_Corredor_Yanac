@@ -50,7 +50,7 @@ fun LoginScreen(
         onEmailChange = authViewModel::onEmailChange,
         onPasswordChange = authViewModel::onPasswordChange,
         onLoginClick = {
-            if (authViewModel.login()) onLoginSuccess()
+            authViewModel.login(onSuccess = onLoginSuccess)
         }
     )
 }

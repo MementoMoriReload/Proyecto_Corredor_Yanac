@@ -2,6 +2,7 @@ package com.example.panalsuite.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.panalsuite.data.SessionManager
 import com.example.panalsuite.model.User
 import com.example.panalsuite.model.UserRole
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 val EMAIL_REGEX = Regex("^[A-Za-z0-9._%+-]+@panal.cl$")
 
@@ -17,6 +19,7 @@ data class LoginUiState(
     val email: String = "",
     val password: String = "",
     val showErrors: Boolean = false,
+    val isLoading: Boolean = false,
     val error: String? = null
 ) {
     val emailError: String?
@@ -41,7 +44,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
-    private val _loginState = MutableStateFlow(LoginUiState(email = sessionManager.getUserEmail()))
+    private val _loginState = MutableStateFlow(LoginUiState(email = sessionManager.getUserEmail()?:""))
     val loginState: StateFlow<LoginUiState> = _loginState.asStateFlow()
 
     private val _users = MutableStateFlow<List<User>>(repository.getUsers())
@@ -62,22 +65,31 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         _loginState.update { it.copy(password = value, error = null) }
     }
 
-    fun login(): Boolean {
+    fun login(onSuccess: () -> Unit = {}) {
         _loginState.update { it.copy(showErrors = true) }
         val state = _loginState.value
 
-        if (!state.isValid) return false
+        if (!state.isValid) return
 
-        val user = repository.login(state.email, state.password)
-        if (user == null) {
-            _loginState.update { it.copy(error = "Correo o contraseña incorrectos") }
-            return false
+        viewModelScope.launch{
+            _loginState.update { it.copy(isLoading = true ,error = null) }
+
+            val user = repository.Apilogin(state.email, state.password)
+
+            if (user != null) {
+                _currentUser.value = user
+                sessionManager.saveUserEmail(user.email)
+                _loginState.value = LoginUiState()
+                onSuccess()
+            } else {
+                _loginState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Correo o contraseña incorrectos"
+                    )
+                }
+            }
         }
-
-        _currentUser.value = user
-        sessionManager.saveUserEmail(user.email)
-        _loginState.value = LoginUiState()
-        return true
     }
 
     fun registerUser(
