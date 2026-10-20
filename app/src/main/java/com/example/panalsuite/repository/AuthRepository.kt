@@ -12,10 +12,19 @@ class AuthRepository{
         User("u5", "Alex Silva", "admin@panal.cl", null,UserRole.ADMIN)
     )
 
-    fun login(email: String, password: String): User? =
-        users.firstOrNull { it.email == email.trim() && password == "1234" }
-    fun register(name: String, email: String, password: String, role: UserRole): User?
-    {
+    private val passwords = mutableMapOf(
+        "u1" to "1234",
+        "u2" to "1234",
+        "u3" to "1234",
+        "u4" to "1234",
+        "u5" to "1234"
+    )
+
+    fun login(email: String, password: String): User? {
+        val user = findByEmail(email)?: return null
+        return if (passwords[user.id] == password) user else null
+    }
+    fun register(name: String, email: String, password: String, role: UserRole): User? {
         if (findByEmail(email)!=null) return null
 
         val user = User(
@@ -26,6 +35,7 @@ class AuthRepository{
             role = role
         )
         users.add(user)
+        passwords[user.id] = password
         return user
     }
 
