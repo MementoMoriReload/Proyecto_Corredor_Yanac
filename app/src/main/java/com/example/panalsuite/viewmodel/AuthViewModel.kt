@@ -41,7 +41,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
-    private val _loginState = MutableStateFlow(LoginUiState())
+    private val _loginState = MutableStateFlow(LoginUiState(email = sessionManager.getUserEmail()))
     val loginState: StateFlow<LoginUiState> = _loginState.asStateFlow()
 
     private val _users = MutableStateFlow<List<User>>(repository.getUsers())

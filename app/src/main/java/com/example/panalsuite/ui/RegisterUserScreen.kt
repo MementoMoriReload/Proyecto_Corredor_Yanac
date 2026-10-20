@@ -35,7 +35,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.panalsuite.model.User
@@ -269,54 +268,4 @@ fun RegisterUserScreenContent(
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun RegisterUserScreenContentPreview() {
-    RegisterUserScreenContent(
-        state = RegisterUiState(
-            name = "Victor Castro",
-            email = "victor@panal.cl",
-            password = "1234",
-            confirmPassword = "1234",
-        ),
-        canCreateUsers = true,
-        onNameChange = {},
-        onEmailChange = {},
-        onPasswordChange = {},
-        onConfirmPasswordChange = {},
-        onRoleChange = {},
-        onSubmit = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun RegisterScreenErrorsPreview() {
-    RegisterUserScreenContent(
-        state = RegisterUiState(showErrors = true),
-        canCreateUsers = true,
-        onNameChange = {},
-        onEmailChange = {},
-        onPasswordChange = {},
-        onConfirmPasswordChange = {},
-        onRoleChange = {},
-        onSubmit = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun RegisterScreenNoPermissionPreview() {
-    RegisterUserScreenContent(
-        state = RegisterUiState(),
-        canCreateUsers = false,
-        onNameChange = {},
-        onEmailChange = {},
-        onPasswordChange = {},
-        onConfirmPasswordChange = {},
-        onRoleChange = {},
-        onSubmit = {}
-    )
 }

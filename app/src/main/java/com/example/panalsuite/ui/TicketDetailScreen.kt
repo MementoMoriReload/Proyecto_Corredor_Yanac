@@ -1,8 +1,6 @@
 package com.example.panalsuite.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,12 +29,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.panalsuite.model.Ticket
-import com.example.panalsuite.model.TicketCategory
 import com.example.panalsuite.model.TicketComment
-import com.example.panalsuite.model.TicketPriority
 import com.example.panalsuite.model.TicketStatus
 import com.example.panalsuite.model.User
 import com.example.panalsuite.model.UserRole
@@ -320,40 +315,4 @@ fun DetailRow(label: String, value: String) {
             style = MaterialTheme.typography.bodyMedium
         )
     }
-}
-@Preview(showBackground = true)
-@Composable
-private fun TicketDetailScreenPreview() {
-    val sampleUser = User(
-        id = "u1",
-        name = "Victor Castro",
-        email = "victor@panal.cl",
-        department = null,
-        role = UserRole.REQUESTER
-    )
-
-    val sampleTicket = Ticket(
-        id = 101,
-        title = "POS sin conexión en caja 2",
-        description = "La máquina no imprime boletas y marca error de red al intentar procesar cobros.",
-        category = TicketCategory.EXAMPLE,
-        priority = TicketPriority.HIGH,
-        status = TicketStatus.IN_PROGRESS,
-        location = "Sucursal Centro",
-        requesterId = "u1",
-        assignedId = "u2",
-        createdAt = "2026-09-01",
-        updatedAt = "2026-09-02"
-    )
-
-    TicketDetailScreenContent(
-        ticket = sampleTicket,
-        user = sampleUser,
-        onBackClick = {},
-        onDashboardClick = {},
-        onManagementClick = {},
-        onLogoutClick = {},
-        onCloseTicket = {},
-        onAddComment = {}
-    )
 }

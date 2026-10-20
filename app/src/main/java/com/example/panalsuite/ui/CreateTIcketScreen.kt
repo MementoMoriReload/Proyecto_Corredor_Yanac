@@ -27,7 +27,7 @@ fun CreateTicketScreen(
     var description by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var priority by remember { mutableStateOf(TicketPriority.MEDIUM) }
-    var category by remember { mutableStateOf(TicketCategory.EXAMPLE) }
+    var category by remember { mutableStateOf(TicketCategory.INVENTORY_STOCK) }
 
     var showError by remember { mutableStateOf(false) }
     var priorityExpanded by remember { mutableStateOf(false) }
@@ -111,7 +111,7 @@ fun CreateTicketScreen(
                     expanded = priorityExpanded,
                     onDismissRequest = { priorityExpanded = false }
                 ) {
-                    TicketPriority.values().forEach { priorityOption ->
+                    TicketPriority.entries.forEach { priorityOption ->
                         DropdownMenuItem(
                             text = { Text(priorityOption.label) },
                             onClick = {

@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 /**
@@ -117,29 +116,4 @@ private fun BottomBarButton(
             maxLines = 1
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AppBottomBarPreview() {
-    AppBottomBar(
-        items = listOf(
-            BottomBarItem("ticketList", "Bandeja"),
-            BottomBarItem("createTicket", "Nuevo"),
-            BottomBarItem("dashboard", "Resumen"),
-            BottomBarItem("action_logout", "Salir")
-        ),
-        currentRoute = "ticketList",
-        onItemClick = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AppBottomBarLoggedOutPreview() {
-    AppBottomBar(
-        items = listOf(BottomBarItem("login", "Iniciar sesión")),
-        currentRoute = "login",
-        onItemClick = {}
-    )
 }

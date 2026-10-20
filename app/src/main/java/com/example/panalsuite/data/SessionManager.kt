@@ -14,14 +14,12 @@ class SessionManager(context: Context) {
     }
 
     // Función para obtener el correo (devuelve null si no hay ninguno)
-    fun getUserEmail(): String? {
-        return prefs.getString("EMAIL", null)
+    fun getUserEmail(): String {
+        return prefs.getString("EMAIL", "")?: ""
     }
 
     // Función para borrar los datos cuando cierra sesión
     fun clearSession() {
         prefs.edit().clear().apply()
     }
-
-
 }

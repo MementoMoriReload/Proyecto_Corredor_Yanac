@@ -36,11 +36,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.panalsuite.model.User
 import com.example.panalsuite.model.UserRole
-import com.example.panalsuite.ui.AppTopBar
 
 @Composable
 fun UserManagementScreen(
@@ -232,23 +230,3 @@ fun RoleBadge(role: UserRole){
         )
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-private fun UserManagementPreview(){
-     val users = listOf(
-        User("u1", "Victor Castro", "victor@panal.cl",null, UserRole.REQUESTER),
-        User("u2", "Martin Contreras", "martin@panal.cl",null, UserRole.RESOLVER),
-        User("u3", "Marta Hernandez", "marta@panal.cl",null, UserRole.SUPERVISOR),
-        User("u4", "Helena Vera", "helena@panal.cl",null , UserRole.MANAGER),
-        User("u5", "Alex Silva", "admin@panal.cl", null,UserRole.ADMIN)
-    )
-
-    UserManagementScreenContent(
-        canManage = true,
-        userList = users,
-        onBackClick = {},
-        onRoleChange = {_, _ ->}
-    )
-}
-

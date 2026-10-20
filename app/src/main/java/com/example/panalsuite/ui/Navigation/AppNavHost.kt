@@ -53,7 +53,7 @@ fun AppNavHost(
     val logoutAndGoToLogin: () -> Unit = {
         authViewModel.logout()
         navController.navigate(Routes.LOGIN) {
-            popUpTo(route = Routes.LOGIN) { inclusive = true }
+            popUpTo(navController.graph.id) { inclusive = true }
         }
     }
 

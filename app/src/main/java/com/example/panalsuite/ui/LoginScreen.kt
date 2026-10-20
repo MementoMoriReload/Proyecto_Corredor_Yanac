@@ -29,7 +29,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.panalsuite.viewmodel.AuthViewModel
@@ -162,66 +161,4 @@ fun LoginScreenContent(
             )
         }
     }
-}
-
-@Composable
-private fun DemoUser(
-    roleLabel: String,
-    email: String,
-    onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit
-) {
-    TextButton(
-        onClick = {
-            onEmailChange(email)
-            onPasswordChange("1234")
-        }
-    ) {
-        Text("$roleLabel · $email")
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun LoginScreenContentPreview() {
-    LoginScreenContent(
-        email = "camila@panalbit.test",
-        password = "1234",
-        emailError = null,
-        passwordError = null,
-        error = null,
-        onEmailChange = {},
-        onPasswordChange = {},
-        onLoginClick = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun LoginScreenFieldErrorsPreview() {
-    LoginScreenContent(
-        email = "",
-        password = "",
-        emailError = "El correo es obligatorio",
-        passwordError = "La contraseña es obligatoria",
-        error = null,
-        onEmailChange = {},
-        onPasswordChange = {},
-        onLoginClick = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun LoginScreenCredentialsErrorPreview() {
-    LoginScreenContent(
-        email = "camila@panalbit.test",
-        password = "mal",
-        emailError = null,
-        passwordError = null,
-        error = "Correo o contraseña incorrectos",
-        onEmailChange = {},
-        onPasswordChange = {},
-        onLoginClick = {}
-    )
 }

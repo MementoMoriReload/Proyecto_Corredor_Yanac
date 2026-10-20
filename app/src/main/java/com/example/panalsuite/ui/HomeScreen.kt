@@ -26,14 +26,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.panalsuite.model.Ticket
-import com.example.panalsuite.model.TicketCategory
 import com.example.panalsuite.model.TicketPriority
 import com.example.panalsuite.model.TicketStatus
 import com.example.panalsuite.model.User
-import com.example.panalsuite.model.UserRole
 import com.example.panalsuite.viewmodel.MenuBarViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
 
@@ -215,49 +212,4 @@ private fun statusColor(status: TicketStatus): Color = when (status) {
     TicketStatus.PENDING -> Color(0xFFF9A825)
     TicketStatus.RESOLVED -> Color(0xFF2E7D32)
     TicketStatus.CLOSED -> Color(0xFF2E7D32)
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeScreenContentPreview() {
-    val sampleUser = User(
-        id = "u1",
-        name = "Victor Castro",
-        email = "victor@panal.cl",
-        department = null,
-        role = UserRole.REQUESTER
-    )
-
-    HomeScreenContent(
-        user = sampleUser,
-        tickets = listOf(
-            Ticket(
-                id = 1,
-                title = "POS sin conexión",
-                description = "La caja 2 no imprime boletas",
-                category = TicketCategory.EXAMPLE,
-                priority = TicketPriority.HIGH,
-                status = TicketStatus.OPEN,
-                location = "Sucursal Centro",
-                requesterId = "u1",
-                assignedId = "u2",
-                createdAt = "2026-09-01",
-                updatedAt = "2026-09-01"
-            ),
-            Ticket(
-                id = 2,
-                title = "Caída de red",
-                description = "Sin internet en bodega",
-                category = TicketCategory.EXAMPLE,
-                priority = TicketPriority.CRITICAL,
-                status = TicketStatus.PENDING,
-                location = "Bodega Sur",
-                requesterId = "u1",
-                assignedId = null,
-                createdAt = "2026-09-03",
-                updatedAt = "2026-09-03"
-            )
-        ),
-        onTicketClick = {}
-    )
 }

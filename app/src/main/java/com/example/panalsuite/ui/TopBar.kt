@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.panalsuite.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,31 +111,4 @@ fun TopBarMenu(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AppTopBarRootPreview() {
-    AppTopBar(
-        title = "Bandeja de tickets",
-        subtitle = "Victor Castro · Solicitante",
-        actions = {
-            TopBarAction("Resumen", onClick = {})
-            TopBarMenu(
-                items = listOf(
-                    "Perfil" to {},
-                    "Salir" to {}
-                )
-            )
-        }
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AppTopBarWithBackPreview() {
-    AppTopBar(
-        title = "Ticket #1",
-        onBackClick = {}
-    )
 }
