@@ -12,8 +12,10 @@ object MenuBarViewModel {
         onLogoutClick: () -> Unit = {},
     ): List<Pair<String, () -> Unit>> {
         val items = mutableListOf<Pair<String, () -> Unit>>()
+                items.add("Perfil" to onProfileClick)
 
         when (userRole) {
+
             UserRole.ADMIN -> {
                 items.add("Dashboard" to onDashboardClick)
                 items.add("Gestión de Usuarios" to onManagementClick)
@@ -28,7 +30,6 @@ object MenuBarViewModel {
             UserRole.REQUESTER -> { }
         }
 
-        items.add("Perfil" to onProfileClick)
         items.add("Cerrar sesíon" to onLogoutClick)
 
         return items

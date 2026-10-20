@@ -1,6 +1,5 @@
 package com.example.panalsuite.ui
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,7 +63,6 @@ fun HomeScreen(
     )
 }
 
-@SuppressLint("RememberReturnType")
 @Composable
 fun HomeScreenContent(
     user: User,
@@ -76,7 +74,7 @@ fun HomeScreenContent(
     onProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
-    val menuItems = remember(user.role) {
+    val menuItems = remember(user.role, onDashboardClick, onManagementClick, onRegisterClick, onProfileClick, onLogoutClick) {
         MenuBarViewModel.MenuItems(
             userRole = user.role,
             onDashboardClick = onDashboardClick,

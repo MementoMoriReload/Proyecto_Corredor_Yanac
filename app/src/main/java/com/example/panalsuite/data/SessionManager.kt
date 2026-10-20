@@ -2,6 +2,7 @@ package com.example.panalsuite.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.panalsuite.model.User
 
 class SessionManager(context: Context) {
     // Crea un archivo local llamado "sesion_panal"
@@ -21,4 +22,6 @@ class SessionManager(context: Context) {
     fun clearSession() {
         prefs.edit().clear().apply()
     }
+
+
 }

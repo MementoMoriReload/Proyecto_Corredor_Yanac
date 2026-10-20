@@ -1,5 +1,8 @@
 package com.example.panalsuite.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -241,19 +244,20 @@ fun TicketDetailScreenContent(
                                 label = { Text("Escribe comentario") },
                                 modifier = Modifier.fillMaxWidth()
                             )
-
+                        AnimatedVisibility( commentText.isNotBlank()) {
                             Button(
-                                onClick = {
-                                    onAddComment(
-                                        commentText
-                                    )
-                                    commentText = ""
-                                },
-                                enabled = commentText.isNotBlank(),
-                                modifier = Modifier.align(Alignment.End)
-                            ) {
-                                Text("Agregar comentario")
-                            }
+                            onClick = {
+                                onAddComment(
+                                    commentText
+                                )
+                                commentText = ""
+                            },
+                            enabled = commentText.isNotBlank(),
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text("Agregar comentario")
+                        } }
+
                         }
                     }
 

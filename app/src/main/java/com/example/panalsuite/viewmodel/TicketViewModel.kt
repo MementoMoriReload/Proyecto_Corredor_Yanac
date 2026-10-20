@@ -31,8 +31,8 @@ class TicketViewModel(
     fun getTicketById(id: Int): Ticket? = _tickets.value.firstOrNull { it.id == id }
 
     fun changeStatus(ticketId: Int, newStatus: TicketStatus) {
-        _tickets.value = _tickets.value.map {
-            if (it.id == ticketId) it.copy(status = newStatus) else it
+        _tickets.update { list ->
+            list.map { if (it.id == ticketId) it.copy(status = newStatus) else it }
         }
     }
 
@@ -81,25 +81,24 @@ class TicketViewModel(
         location: String,
         requesterId: String
     ) {
-        val currentTickets = _tickets.value
-        val newId = (currentTickets.maxOfOrNull { it.id } ?: 0) + 1
-        val currentDate = LocalDate.now().toString() // Genera la fecha actual automáticamente (ej. "2026-10-15")
-
-        val newTicket = Ticket(
-            id = newId,
-            title = title.trim(),
-            description = description.trim(),
-            category = category,
-            priority = priority,
-            status = TicketStatus.OPEN,
-            location = location.trim(),
-            requesterId = requesterId,
-            assignedId = null,
-            comments = emptyList(),
-            createdAt = currentDate,
-            updatedAt = currentDate
-        )
-
-        _tickets.value = currentTickets + newTicket
+        val currentDate = LocalDate.now().toString()
+        _tickets.update { currentList ->
+            val newId = (currentList.maxOfOrNull { it.id } ?: 0) + 1
+            val newTicket = Ticket(
+                id = newId,
+                title = title.trim(),
+                description = description.trim(),
+                category = category,
+                priority = priority,
+                status = TicketStatus.OPEN,
+                location = location.trim(),
+                requesterId = requesterId,
+                assignedId = null,
+                comments = emptyList(),
+                createdAt = currentDate,
+                updatedAt = currentDate
+            )
+            currentList + newTicket
+        }
     }
 }

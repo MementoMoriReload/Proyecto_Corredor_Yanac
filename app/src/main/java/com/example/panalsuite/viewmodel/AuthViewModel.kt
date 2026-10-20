@@ -89,10 +89,12 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         if (_currentUser.value?.role?.canCreateUser != true) {
             return "No tienes permisos para crear usuarios"
         }
+        if (repository.findByEmail(email) != null) {
+            return "Ya existe un usuario registrado con este correo"
+        }
 
-
-        val newUser = repository.register(name, email, password, role)
-            ?:return "Error al crear el usuario"
+        repository.register(name, email, password, role)
+            ?: return "Error al crear el usuario"
 
         _users.update { repository.getUsers() }
 

@@ -33,7 +33,7 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title = "Mi Perfil",
+                title = "${user.name} · ${user.role.label}",
                 onBackClick = onBackClick
             )
         }
