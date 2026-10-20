@@ -1,6 +1,7 @@
 package com.example.panalsuite.ui
 
-import android.R.attr.padding
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,16 +17,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -111,6 +113,7 @@ fun UserCard(
     onRoleChanged: (UserRole) -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
+    var pendingRoleChange by remember { mutableStateOf<UserRole?>(null) }
 
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -165,7 +168,7 @@ fun UserCard(
                             text = { Text(roleOption.label) },
                             onClick = {
                                 menuExpanded = false
-                                onRoleChanged(roleOption)
+                                pendingRoleChange = roleOption
                             },
                             enabled = roleOption != user.role
                         )
@@ -174,27 +177,59 @@ fun UserCard(
             }
         }
     }
+
+    pendingRoleChange?.let { newRole ->
+        AlertDialog(
+            onDismissRequest = { pendingRoleChange = null },
+            title = { Text("Confirmar cambio de rol") },
+            text = { Text("¿Estás seguro de que deseas cambiar el rol de ${user.name} a ${newRole.label}?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onRoleChanged(newRole)
+                        pendingRoleChange = null
+                    }
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { pendingRoleChange = null }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
 
 @Composable
 fun RoleBadge(role: UserRole){
-    val badgeColor = when (role) {
-        UserRole.REQUESTER -> Color(0xFF757575) to Color.White
-        UserRole.RESOLVER -> Color(0xFF388E3C) to Color.White
-        UserRole.SUPERVISOR -> Color(0xFFFDBE02) to Color.White
-        UserRole.MANAGER -> Color(0xFF3737E7) to Color.White
-        UserRole.ADMIN -> Color(0xFF000080) to Color.White
+    val targetColor = when (role) {
+        UserRole.REQUESTER -> Color(0xFF757575)
+        UserRole.RESOLVER -> Color(0xFF388E3C)
+        UserRole.SUPERVISOR -> Color(0xFFFDBE02)
+        UserRole.MANAGER -> Color(0xFF3737E7)
+        UserRole.ADMIN -> Color(0xFF000080)
     }
-    Surface(
-        color = badgeColor.first,
-        shape = RoundedCornerShape(21.dp)
-    ){
-    Text(
-        text = role.label,
-        color = badgeColor.second,
-        style = MaterialTheme.typography.labelSmall,
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+
+    val animatedBackgroundColor by animateColorAsState(
+        targetValue = targetColor,
+        animationSpec = tween(durationMillis = 350),
+        label = "RoleBadgeColor"
     )
+
+    Surface(
+        color = animatedBackgroundColor,
+        shape = RoundedCornerShape(21.dp)
+    ) {
+        Text(
+            text = role.label,
+            color = Color.White,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
     }
 }
 

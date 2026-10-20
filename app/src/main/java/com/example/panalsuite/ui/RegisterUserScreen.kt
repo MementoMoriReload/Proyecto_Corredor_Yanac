@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +49,7 @@ fun RegisterUserScreen(
     user: User,
     authViewModel: AuthViewModel,
     registerViewModel: RegisterViewModel,
-    onRegisterSuccess: () -> Unit = {}
+    onRegisterSuccess: () -> Unit = {},
 ) {
     val state by registerViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -59,24 +61,25 @@ fun RegisterUserScreen(
         onPasswordChange = registerViewModel::onPasswordChange,
         onConfirmPasswordChange = registerViewModel::onConfirmPasswordChange,
         onRoleChange = registerViewModel::onRoleChange,
-        onSubmit ={
+        onSubmit = {
             registerViewModel.submit()?.let { form ->
                 val error = authViewModel.registerUser(
                     name = form.name,
                     email = form.email,
                     password = form.password,
-                    role = form.role
+                    role = form.role,
                 )
                 if (error == null) {
                     registerViewModel.onSuccess(form.name)
-                    onRegisterSuccess()
                 } else {
                     registerViewModel.onError(error)
                 }
             }
-        }
+        },
+        onDismissSuccessDialog = onRegisterSuccess,
     )
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterUserScreenContent(
@@ -87,11 +90,13 @@ fun RegisterUserScreenContent(
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
     onRoleChange: (UserRole) -> Unit,
-    onSubmit: () -> Unit
-){
+    onSubmit: () -> Unit,
+    onDismissSuccessDialog: () -> Unit = {},
+) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var roleExpanded by rememberSaveable { mutableStateOf(false) }
 
+    val showDialog = state.successMessage != null
 
     val nameError = if (state.showErrors) state.nameError else null
     val emailError = if (state.showErrors) state.emailError else null
@@ -137,7 +142,7 @@ fun RegisterUserScreenContent(
                     onValueChange = onEmailChange,
                     label = { Text("Correo electrónico") },
                     singleLine = true,
-                    isError = emailError != null || state.error != null,
+                    isError = (emailError != null || state.error != null),
                     supportingText = { emailError?.let { Text(it) } },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -201,7 +206,7 @@ fun RegisterUserScreenContent(
                         label = { Text("Rol de usuario") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = roleExpanded) },
                         modifier = Modifier
-                            .menuAnchor()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                             .fillMaxWidth()
                     )
                     ExposedDropdownMenu(
@@ -248,6 +253,21 @@ fun RegisterUserScreenContent(
                 }
             }
         }
+
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = onDismissSuccessDialog,
+                title = { Text("Éxito") },
+                text = {
+                    Text(state.successMessage)
+                },
+                confirmButton = {
+                    TextButton(onClick = onDismissSuccessDialog) {
+                        Text("Aceptar")
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -255,12 +275,11 @@ fun RegisterUserScreenContent(
 @Composable
 private fun RegisterUserScreenContentPreview() {
     RegisterUserScreenContent(
-    state = RegisterUiState(
+        state = RegisterUiState(
             name = "Victor Castro",
             email = "victor@panal.cl",
             password = "1234",
             confirmPassword = "1234",
-            successMessage = "Usuario \"Ana Soto\" registrado correctamente"
         ),
         canCreateUsers = true,
         onNameChange = {},
