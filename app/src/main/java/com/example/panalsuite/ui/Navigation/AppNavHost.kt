@@ -76,6 +76,12 @@ fun AppNavHost(
         }
     }
 
+    val toProfile:() -> Unit = {
+        navController.navigate(Routes.PROFILE) {
+            launchSingleTop = true
+        }
+    }
+
     Scaffold(
         bottomBar = {
             if (currentRoute != Routes.LOGIN) {
@@ -161,11 +167,7 @@ fun AppNavHost(
                         onDashboardClick = toDashboard,
                         onManagementClick = toManagement,
                         onRegisterClick = toRegister,
-                        onProfileClick = {
-                            navController.navigate(Routes.PROFILE) {
-                                launchSingleTop = true
-                            }
-                        },
+                        onProfileClick = toProfile,
                         onLogoutClick = logoutAndGoToLogin
                     )
                 }
@@ -188,15 +190,20 @@ fun AppNavHost(
                 val ticketId = entry.arguments?.getInt("ticketId") ?: 0
                 val tickets by ticketViewModel.tickets.collectAsState()
                 val currentTicket = tickets.find { it.id == ticketId }
+                val usersList by authViewModel.users.collectAsState()
+
 
                 user?.let { currentUser ->
                     TicketDetailScreen(
                         ticket = currentTicket,
                         user = currentUser,
+                        users = usersList,
                         ticketViewModel = ticketViewModel,
                         onBackClick = { navController.popBackStack() },
                         onDashboardClick = toDashboard,
                         onManagementClick = toManagement,
+                        onRegisterClick = toRegister,
+                        onProfileClick = toProfile,
                         onLogoutClick = logoutAndGoToLogin
                     )
                 }
@@ -222,11 +229,7 @@ fun AppNavHost(
                         user = currentUser,
                         ticketViewModel = ticketViewModel,
                         onBackClick = { navController.popBackStack() },
-                        onProfileClick = {
-                            navController.navigate(Routes.PROFILE) {
-                                launchSingleTop = true
-                            }
-                        },
+                        onProfileClick = toProfile,
                         onLogoutClick = logoutAndGoToLogin
                     )
                 }

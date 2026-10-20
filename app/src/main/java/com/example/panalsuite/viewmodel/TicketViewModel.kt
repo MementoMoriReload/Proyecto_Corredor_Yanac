@@ -9,6 +9,7 @@ import com.example.panalsuite.model.TicketPriority
 import com.example.panalsuite.model.User
 import com.example.panalsuite.model.UserRole
 import com.example.panalsuite.repository.TicketRepository
+import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.collect.Collections2.transform
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,9 +31,9 @@ class TicketViewModel(
 
     fun getTicketById(id: Int): Ticket? = _tickets.value.firstOrNull { it.id == id }
 
-    fun changeStatus(ticketId: Int, newStatus: TicketStatus) {
+    fun updateTicket(ticketId: Int, transform: (Ticket) -> Ticket) {
         _tickets.update { list ->
-            list.map { if (it.id == ticketId) it.copy(status = newStatus) else it }
+            list.map { it -> if (it.id == ticketId) transform(it) else it }
         }
     }
 
@@ -49,6 +50,10 @@ class TicketViewModel(
                 }
             }
         }
+    }
+
+    fun assignTicket(ticketId: Int, resolverId: String?) {
+        updateTicket(ticketId) { it.copy(assignedId = resolverId, updatedAt = LocalDate.now().toString()) }
     }
 
     fun addComment(ticketId: Int, author: String, text: String) {

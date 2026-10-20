@@ -15,6 +15,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -28,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.panalsuite.model.Ticket
 import com.example.panalsuite.model.TicketComment
@@ -42,16 +45,19 @@ import com.example.panalsuite.viewmodel.TicketViewModel
 fun TicketDetailScreen(
     ticket: Ticket?,
     user: User,
+    users: List<User>,
     ticketViewModel: TicketViewModel,
     onBackClick: () -> Unit,
     onDashboardClick: () -> Unit = {},
     onManagementClick: () -> Unit = {},
+    onRegisterClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
     val tickets by ticketViewModel.tickets.collectAsState()
-    val currentticket = tickets.find { it.id == ticket?.id }
+    val currentTicket = tickets.find { it.id == ticket?.id }
 
-    if (currentticket == null){
+    if (currentTicket == null) {
         Scaffold(
             topBar = {
                 AppTopBar(
@@ -72,41 +78,61 @@ fun TicketDetailScreen(
         }
     } else {
         TicketDetailScreenContent(
-            ticket = currentticket,
+            ticket = currentTicket,
             user = user,
+            users = users,
             onBackClick = onBackClick,
             onDashboardClick = onDashboardClick,
             onManagementClick = onManagementClick,
+            onRegisterClick = onRegisterClick,
+            onProfileClick = onProfileClick,
             onLogoutClick = onLogoutClick,
-            onCloseTicket ={ ticketViewModel.closeTicket(currentticket.id)},
+            onCloseTicket = { ticketViewModel.closeTicket(currentTicket.id) },
             onAddComment = { commentText ->
                 ticketViewModel.addComment(
-                    currentticket.id,
-                     user.name,
-                    commentText)
+                    currentTicket.id,
+                    user.name,
+                    commentText
+                )
+            },
+            onAssignResolver = { resolverId ->
+                ticketViewModel.assignTicket(currentTicket.id, resolverId)
             }
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TicketDetailScreenContent(
     ticket: Ticket,
     user: User,
+    users: List<User>,
     onBackClick: () -> Unit,
     onDashboardClick: () -> Unit,
     onManagementClick: () -> Unit,
+    onRegisterClick: () -> Unit,
+    onProfileClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onCloseTicket: () -> Unit,
-    onAddComment: (String) -> Unit
+    onAddComment: (String) -> Unit,
+    onAssignResolver: (String?) -> Unit
 ) {
     var commentText by remember { mutableStateOf("") }
+    val resolvers = remember(users) { users.filter { it.role == UserRole.RESOLVER } }
+    var resolversExpanded by remember { mutableStateOf(false) }
+
+    val currentResolver = remember(ticket.assignedId, users) {
+        users.find { it.id == ticket.assignedId }
+    }
 
     val menuItems = remember(user.role) {
         MenuBarViewModel.MenuItems(
             userRole = user.role,
             onDashboardClick = onDashboardClick,
-            onManagementClick = onManagementClick
+            onManagementClick = onManagementClick,
+            onRegisterClick = onRegisterClick,
+            onProfileClick = onProfileClick
         )
     }
 
@@ -135,7 +161,6 @@ fun TicketDetailScreenContent(
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
-
                 ) {
                     Text(
                         text = ticket.title,
@@ -144,12 +169,12 @@ fun TicketDetailScreenContent(
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        Arrangement.SpaceBetween,
-                        Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
                                 text = "Estado: ",
@@ -168,7 +193,7 @@ fun TicketDetailScreenContent(
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
                         text = "Descripción",
@@ -176,9 +201,7 @@ fun TicketDetailScreenContent(
                     )
                     HorizontalDivider()
                     Text(
-                        text = ticket.description.ifEmpty {
-                            "Sin descripción"
-                        },
+                        text = ticket.description.ifEmpty { "Sin descripción" },
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -189,7 +212,7 @@ fun TicketDetailScreenContent(
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
                         text = "Información General",
@@ -200,12 +223,76 @@ fun TicketDetailScreenContent(
                     DetailRow(label = "Categoría", value = ticket.category.label)
                     DetailRow(label = "Ubicación", value = ticket.location)
                     DetailRow(label = "Solicitante ID", value = ticket.requesterId)
-                    DetailRow(label = "Asignado a", value = ticket.assignedId ?: "Sin asignar")
+                    DetailRow(
+                        label = "Resolutor asignado",
+                        value = currentResolver?.name ?: "Sin asignar"
+                    )
                     DetailRow(label = "Fecha de creación", value = ticket.createdAt)
                     DetailRow(label = "Última actualización", value = ticket.updatedAt)
                 }
             }
 
+            // Selector de Resolutor (Solo visible para Resolutores o Managers)
+            if (user.role == UserRole.RESOLVER || user.role == UserRole.MANAGER) {
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(
+                            text = "Asignar a resolutor",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        HorizontalDivider()
+
+                        if (resolvers.isEmpty()) {
+                            Text(
+                                text = "No hay resolutores disponibles.",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        } else {
+                            ExposedDropdownMenuBox(
+                                expanded = resolversExpanded,
+                                onExpandedChange = { resolversExpanded = !resolversExpanded }
+                            ) {
+                                OutlinedTextField(
+                                    value = currentResolver?.name ?: "Seleccionar resolutor",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Resolutor") },
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(
+                                            expanded = resolversExpanded
+                                        )
+                                    },
+                                    modifier = Modifier
+                                        .menuAnchor()
+                                        .fillMaxWidth()
+                                )
+
+                                ExposedDropdownMenu(
+                                    expanded = resolversExpanded,
+                                    onDismissRequest = { resolversExpanded = false }
+                                ) {
+                                    resolvers.forEach { option ->
+                                        DropdownMenuItem(
+                                            text = { Text(option.name) },
+                                            onClick = {
+                                                onAssignResolver(option.id)
+                                                resolversExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Sección de Comentarios y Acciones
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -223,7 +310,7 @@ fun TicketDetailScreenContent(
                         Text(
                             text = "Aún no hay comentarios.",
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFFC62828)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     } else {
                         ticket.comments.forEach { comment ->
@@ -239,20 +326,21 @@ fun TicketDetailScreenContent(
                                 label = { Text("Escribe comentario") },
                                 modifier = Modifier.fillMaxWidth()
                             )
-                        AnimatedVisibility( commentText.isNotBlank()) {
-                            Button(
-                            onClick = {
-                                onAddComment(
-                                    commentText
-                                )
-                                commentText = ""
-                            },
-                            enabled = commentText.isNotBlank(),
-                            modifier = Modifier.align(Alignment.End)
-                        ) {
-                            Text("Agregar comentario")
-                        } }
-
+                            AnimatedVisibility(visible = commentText.isNotBlank()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            onAddComment(commentText)
+                                            commentText = ""
+                                        }
+                                    ) {
+                                        Text("Agregar comentario")
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -264,7 +352,8 @@ fun TicketDetailScreenContent(
                                 containerColor = MaterialTheme.colorScheme.error,
                                 contentColor = MaterialTheme.colorScheme.onError
                             ),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .height(50.dp)
                         ) {
                             Text("Cerrar ticket")
@@ -275,6 +364,7 @@ fun TicketDetailScreenContent(
         }
     }
 }
+
 @Composable
 private fun CommentItem(comment: TicketComment) {
     Card(
@@ -303,7 +393,7 @@ private fun CommentItem(comment: TicketComment) {
 fun DetailRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = label,
