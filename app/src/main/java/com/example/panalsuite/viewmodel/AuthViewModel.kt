@@ -19,7 +19,6 @@ data class LoginUiState(
     val email: String = "",
     val password: String = "",
     val showErrors: Boolean = false,
-    val isLoading: Boolean = false,
     val error: String? = null
 ) {
     val emailError: String?
@@ -72,7 +71,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         if (!state.isValid) return
 
         viewModelScope.launch{
-            _loginState.update { it.copy(isLoading = true ,error = null) }
+            _loginState.update { it.copy(error = null) }
 
             val user = repository.Apilogin(state.email, state.password)
 
@@ -84,7 +83,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             } else {
                 _loginState.update {
                     it.copy(
-                        isLoading = false,
                         error = "Correo o contraseña incorrectos"
                     )
                 }

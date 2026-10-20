@@ -12,7 +12,7 @@ object MenuBarViewModel {
         onLogoutClick: () -> Unit = {},
     ): List<Pair<String, () -> Unit>> {
         val items = mutableListOf<Pair<String, () -> Unit>>()
-                items.add("Perfil" to onProfileClick)
+        items.add("Perfil" to onProfileClick)
 
         when (userRole) {
 

@@ -11,25 +11,6 @@ class SessionManager(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("sesion_panal", Context.MODE_PRIVATE)
     private val gson = Gson()
 
-    fun saveToken(token: String) {
-        prefs.edit().putString("AUTH_TOKEN", token).apply()
-    }
-
-    fun getToken(): String? {
-        return prefs.getString("AUTH_TOKEN", null)
-    }
-
-    fun saveTicket(tickets: List<Ticket>) {
-        val json = gson.toJson(tickets)
-        prefs.edit().putString("TICKETS", json).apply()
-    }
-
-    fun getTickets(): List<Ticket> {
-        val json = prefs.getString("TICKETS", null)
-        val type = object : TypeToken<List<Ticket>>() {}.type
-        return gson.fromJson(json, type)
-    }
-
     // Función para guardar el correo
     fun saveUserEmail(email: String) {
         prefs.edit().putString("EMAIL", email).apply()
