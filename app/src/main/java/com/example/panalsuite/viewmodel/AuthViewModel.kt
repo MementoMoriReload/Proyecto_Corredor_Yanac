@@ -1,11 +1,13 @@
 package com.example.panalsuite.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.panalsuite.data.SessionManager
 import com.example.panalsuite.model.User
 import com.example.panalsuite.model.UserRole
+import com.example.panalsuite.network.userMessage
 import com.example.panalsuite.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +20,7 @@ val EMAIL_REGEX = Regex("^[A-Za-z0-9._%+-]+@panal.cl$")
 data class LoginUiState(
     val email: String = "",
     val password: String = "",
+    val isLoading: Boolean = false,
     val showErrors: Boolean = false,
     val error: String? = null
 ) {
@@ -40,19 +43,35 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = AuthRepository()
     private val sessionManager = SessionManager(application)
 
-    private val _currentUser = MutableStateFlow<User?>(null)
+    private val _currentUser = MutableStateFlow<User?>(sessionManager.getSavedUser())
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
-    private val _loginState = MutableStateFlow(LoginUiState(email = sessionManager.getUserEmail()?:""))
+    private val _loginState = MutableStateFlow(
+        LoginUiState(email = sessionManager.getUserEmail())
+    )
     val loginState: StateFlow<LoginUiState> = _loginState.asStateFlow()
 
-    private val _users = MutableStateFlow<List<User>>(repository.getUsers())
+    private val _users = MutableStateFlow<List<User>>(emptyList())
     val users: StateFlow<List<User>> = _users.asStateFlow()
 
+    private val _actionError = MutableStateFlow<String?>(null)
+    val actionError: StateFlow<String?> = _actionError.asStateFlow()
+
     init {
-        sessionManager.getUserEmail()?.let { savedEmail ->
-            _currentUser.value = repository.findByEmail(savedEmail)
-            if (_currentUser.value == null) sessionManager.clearSession()
+        if (_currentUser.value != null) loadUsers()
+    }
+
+    fun clearActionError() {
+        _actionError.value = null
+    }
+
+    fun loadUsers() {
+        viewModelScope.launch {
+            repository.getUsers()
+                .onSuccess { _users.value = it }
+                .onFailure {
+                    Log.e("AuthVM", "No se pudieron cargar los usuarios: ${it.userMessage()}")
+                }
         }
     }
 
@@ -68,25 +87,24 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         _loginState.update { it.copy(showErrors = true) }
         val state = _loginState.value
 
-        if (!state.isValid) return
+        if (!state.isValid || state.isLoading) return
 
-        viewModelScope.launch{
-            _loginState.update { it.copy(error = null) }
+        viewModelScope.launch {
+            _loginState.update { it.copy(isLoading = true, error = null) }
 
-            val user = repository.Apilogin(state.email, state.password)
-
-            if (user != null) {
-                _currentUser.value = user
-                sessionManager.saveUserEmail(user.email)
-                _loginState.value = LoginUiState()
-                onSuccess()
-            } else {
-                _loginState.update {
-                    it.copy(
-                        error = "Correo o contraseña incorrectos"
-                    )
+            repository.login(state.email.trim(), state.password)
+                .onSuccess { user ->
+                    _currentUser.value = user
+                    sessionManager.saveUser(user)
+                    _loginState.value = LoginUiState()
+                    loadUsers()
+                    onSuccess()
                 }
-            }
+                .onFailure { e ->
+                    _loginState.update {
+                        it.copy(isLoading = false, error = e.userMessage())
+                    }
+                }
         }
     }
 
@@ -94,40 +112,58 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         name: String,
         email: String,
         password: String,
-        role: UserRole
-    ): String? {
+        role: UserRole,
+        onResult: (Result<User>) -> Unit = {}
+    ) {
         if (_currentUser.value?.role?.canCreateUser != true) {
-            return "No tienes permisos para crear usuarios"
+            val message = "No tienes permisos para crear usuarios"
+            _actionError.value = message
+            onResult(Result.failure(IllegalStateException(message)))
+            return
         }
-        if (repository.findByEmail(email) != null) {
-            return "Ya existe un usuario registrado con este correo"
+
+        viewModelScope.launch {
+            repository.register(name.trim(), email.trim(), password, role)
+                .onSuccess { created ->
+                    _users.update { it + created }
+                    _actionError.value = null
+                    onResult(Result.success(created))
+                }
+                .onFailure { e ->
+                    val message = e.userMessage()
+                    _actionError.value = message
+                    Log.e("AuthVM", "Error al registrar usuario: $message")
+                    onResult(Result.failure(e))
+                }
         }
-
-        repository.register(name, email, password, role)
-            ?: return "Error al crear el usuario"
-
-        _users.update { repository.getUsers() }
-
-        return null
-
     }
 
-
     fun updateUserRole(userId: String, newRole: UserRole) {
-        val success = repository.updateUserRole(userId, newRole)
-        if (success){
-            _users.update { repository.getUsers() }
-
-            if (_currentUser.value?.id == userId){
-                _currentUser.update {it?.copy(role = newRole)}
-            }
+        viewModelScope.launch {
+            repository.updateUserRole(userId, newRole)
+                .onSuccess { updated ->
+                    _users.update { list ->
+                        list.map { if (it.id == updated.id) updated else it }
+                    }
+                    if (_currentUser.value?.id == updated.id) {
+                        _currentUser.value = updated
+                        sessionManager.saveUser(updated)
+                    }
+                    _actionError.value = null
+                }
+                .onFailure { e ->
+                    val message = e.userMessage()
+                    _actionError.value = message
+                    Log.e("AuthVM", "Error al actualizar rol: $message")
+                }
         }
     }
 
     fun logout() {
         sessionManager.clearSession()
         _currentUser.value = null
+        _users.value = emptyList()
+        _actionError.value = null
         _loginState.value = LoginUiState()
     }
 }
-

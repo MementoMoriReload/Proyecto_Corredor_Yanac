@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.panalsuite.model.User
 import com.example.panalsuite.model.UserRole
+import com.example.panalsuite.network.userMessage
 import com.example.panalsuite.viewmodel.AuthViewModel
 import com.example.panalsuite.viewmodel.RegisterUiState
 import com.example.panalsuite.viewmodel.RegisterViewModel
@@ -62,16 +63,15 @@ fun RegisterUserScreen(
         onRoleChange = registerViewModel::onRoleChange,
         onSubmit = {
             registerViewModel.submit()?.let { form ->
-                val error = authViewModel.registerUser(
+                authViewModel.registerUser(
                     name = form.name,
                     email = form.email,
                     password = form.password,
                     role = form.role,
-                )
-                if (error == null) {
-                    registerViewModel.onSuccess(form.name)
-                } else {
-                    registerViewModel.onError(error)
+                ) { result ->
+                    result
+                        .onSuccess { registerViewModel.onSuccess(form.name) }
+                        .onFailure { registerViewModel.onError(it.userMessage()) }
                 }
             }
         },

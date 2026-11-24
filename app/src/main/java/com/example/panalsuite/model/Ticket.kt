@@ -1,7 +1,7 @@
 package com.example.panalsuite.model
 
 data class TicketComment(
-    val id: Int,
+    val id: String,
     val author: String,
     val text: String,
     val timestamp: String
