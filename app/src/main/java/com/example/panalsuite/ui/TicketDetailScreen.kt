@@ -42,6 +42,9 @@ import com.example.panalsuite.viewmodel.MenuBarViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
+import android.content.Intent
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun TicketDetailScreen(
@@ -130,6 +133,7 @@ fun TicketDetailScreenContent(
     val resolvers = remember(users) { users.filter { it.role == UserRole.RESOLVER } }
     var resolversExpanded by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val currentResolver = remember(ticket.assignedId, users) {
         users.find { it.id == ticket.assignedId }
@@ -384,6 +388,27 @@ fun TicketDetailScreenContent(
                         ) {
                             Text("Cerrar ticket")
                         }
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            val summary = "Ticket #${ticket.id}: ${ticket.title}\n" +
+                                    "Estado: ${ticket.status.label}\n" +
+                                    "Prioridad: ${ticket.priority.label}\n" +
+                                    "Ubicación: ${ticket.location}\n" +
+                                    "Descripción: ${ticket.description}"
+                            val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_SUBJECT, "Ticket #${ticket.id}")
+                                putExtra(Intent.EXTRA_TEXT, summary)
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, "Compartir ticket"))
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                    ) {
+                        Text("Compartir ticket")
                     }
 
                     if (user.role.canManage) {
