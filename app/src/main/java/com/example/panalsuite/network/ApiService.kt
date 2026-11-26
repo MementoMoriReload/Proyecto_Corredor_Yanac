@@ -88,7 +88,7 @@ data class TicketDTO(
     val status: TicketStatus,
     val location: String,
     val requesterId: Long,
-    val assignedId: Long,
+    val assignedId: Long?,
     val comments: List<CommentDTO>,
     val createdAt: String?,
     val updatedAt: String?
@@ -114,7 +114,7 @@ fun TicketDTO.toTicket() = Ticket (
     status = status,
     location = location?: "",
     requesterId = requesterId.toString(),
-    assignedId = assignedId.toString(),
+    assignedId = assignedId?.toString(),
     comments = (comments ?: emptyList()).map {
     TicketComment(
         id = it.id.toString(),
@@ -144,7 +144,7 @@ fun <T> Response<T>.bodyOrThrow(): T {
 
 fun Throwable.userMessage(): String  = when (this) {
     is ApiException -> message ?: "Error del servidor"
-    is HttpException -> "Error del servidor (${code()}())"
+    is HttpException -> "Error del servidor (${code()})"
     is IOException -> "Error de red"
     else -> message ?: "Error inesperado"
 }
@@ -172,7 +172,7 @@ interface ApiService {
     @GET("api/v1/ticket")
     suspend fun getTickets(): List<TicketDTO>
 
-    @POST("api/v1/ticket/{id}/comment")
+    @POST("api/v1/ticket/{id}/comments")
     suspend fun createComment(@Path("id") id: Long, @Body request: CommentRequestDTO): Response<TicketDTO>
 
     @PATCH("api/v1/ticket/{id}/status")
