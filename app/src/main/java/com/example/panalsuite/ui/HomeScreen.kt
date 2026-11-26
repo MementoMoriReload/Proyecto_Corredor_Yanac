@@ -34,6 +34,8 @@ import com.example.panalsuite.model.TicketStatus
 import com.example.panalsuite.model.User
 import com.example.panalsuite.viewmodel.MenuBarViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.panalsuite.viewmodel.HolidayViewModel
 
 @Composable
 fun HomeScreen(
@@ -44,9 +46,11 @@ fun HomeScreen(
     onManagementClick: () -> Unit = {},
     onRegisterClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    holidayViewModel: HolidayViewModel = viewModel()
     ) {
     val tickets by ticketViewModel.tickets.collectAsState()
+    val holidayText by holidayViewModel.holidayText.collectAsState()
     LaunchedEffect(Unit) { ticketViewModel.loadTickets() }
     val visibleTickets = remember(tickets, user) { ticketViewModel.getVisibleTickets(user) }
 
@@ -58,7 +62,9 @@ fun HomeScreen(
         onManagementClick = onManagementClick,
         onRegisterClick = onRegisterClick,
         onProfileClick = onProfileClick,
-        onLogoutClick = onLogoutClick
+        onLogoutClick = onLogoutClick,
+        holidayText = holidayText
+
     )
 }
 
@@ -71,7 +77,8 @@ fun HomeScreenContent(
     onManagementClick: () -> Unit = {},
     onRegisterClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    holidayText: String? = null
 ) {
     val menuItems = remember(user.role, onDashboardClick, onManagementClick, onRegisterClick, onProfileClick, onLogoutClick) {
         MenuBarViewModel.MenuItems(
@@ -95,32 +102,47 @@ fun HomeScreenContent(
             )
         }
     ) { padding ->
-        if (tickets.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("No hay tickets para mostrar")
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(tickets, key = { it.id }) { ticket ->
-                    TicketCard(
-                        ticket = ticket,
-                        onClick = { onTicketClick(ticket.id) }
-                    )
+        Column(modifier = Modifier.padding(padding)) {
+            holidayText?.let { HolidayCard(text = it) }
+
+            if (tickets.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No hay tickets para mostrar")
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(tickets, key = { it.id }) { ticket ->
+                        TicketCard(
+                            ticket = ticket,
+                            onClick = { onTicketClick(ticket.id) }
+                        )
+                    }
                 }
             }
         }
     }
 }
 
+@Composable
+fun HolidayCard(text: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(12.dp)
+        )
+    }
+}
 @Composable
 fun TicketCard(
     ticket: Ticket,
