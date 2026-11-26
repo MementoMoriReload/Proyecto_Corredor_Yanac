@@ -1,50 +1,68 @@
 package com.example.panalsuite.data
 
 import android.content.Context
-import android.content.SharedPreferences
-import com.example.panalsuite.model.Ticket
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.example.panalsuite.model.User
-import com.google.gson.reflect.TypeToken
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
+// Crea el archivo local "sesion_panal" en el teléfono
+private val Context.dataStore by preferencesDataStore(name = "sesion_panal")
 
 class SessionManager(context: Context) {
-    // Crea un archivo local llamado "sesion_panal"
-    private val prefs: SharedPreferences = context.getSharedPreferences("sesion_panal", Context.MODE_PRIVATE)
+
+    private val dataStore = context.applicationContext.dataStore
     private val gson = Gson()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-
-    // Guarda el usuario(sesion)
-    fun saveUser(user: User){
-        prefs.edit()
-            .putString("USER", gson.toJson(user))
-            .putString("EMAIL", user.email)
-            .apply()
+    private companion object {
+        val USER_KEY = stringPreferencesKey("USER")
+        val EMAIL_KEY = stringPreferencesKey("EMAIL")
     }
 
-    // Recupera el usuario(sesion) guardado
+    // Guarda el usuario
+    fun saveUser(user: User) {
+        scope.launch {
+            dataStore.edit { prefs ->
+                prefs[USER_KEY] = gson.toJson(user)
+                prefs[EMAIL_KEY] = user.email
+            }
+        }
+    }
+
+    // Recupera el usuario guardado
     fun getSavedUser(): User? {
-        val json = prefs.getString("USER", null)?: return null
+        val json = runBlocking { dataStore.data.first()[USER_KEY] } ?: return null
         return try {
             gson.fromJson(json, User::class.java)
-
-        }
-        catch (e: Exception){
+        } catch (e: Exception) {
             null
         }
     }
 
-    // Función para guardar el correo
+    // Guarda el correo
     fun saveUserEmail(email: String) {
-        prefs.edit().putString("EMAIL", email).apply()
+        scope.launch {
+            dataStore.edit { prefs -> prefs[EMAIL_KEY] = email }
+        }
     }
 
-    // Función para obtener el correo (devuelve null si no hay ninguno)
+    // Devuelve el correo guardado
     fun getUserEmail(): String {
-        return prefs.getString("EMAIL", "")?: ""
+        return runBlocking { dataStore.data.first()[EMAIL_KEY] } ?: ""
     }
 
-    // Función para borrar los datos cuando cierra sesión
+    // Borra los datos cuando cierra sesión
     fun clearSession() {
-        prefs.edit().clear().apply()
+        scope.launch {
+            dataStore.edit { prefs -> prefs.clear() }
+        }
     }
 }
