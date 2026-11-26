@@ -19,9 +19,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-class TicketViewModel : ViewModel() {
+class TicketViewModel(
     private val repository: TicketRepository = TicketRepository()
-
+) : ViewModel() {
     private val _tickets = MutableStateFlow<List<Ticket>>(emptyList())
     val tickets: StateFlow<List<Ticket>> = _tickets.asStateFlow()
 

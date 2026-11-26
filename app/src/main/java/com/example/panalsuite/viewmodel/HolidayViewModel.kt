@@ -10,8 +10,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class HolidayViewModel : ViewModel() {
-    private val repository = HolidayRepository()
+class HolidayViewModel(
+    private val repository: HolidayRepository = HolidayRepository()
+) : ViewModel() {
 
     // null = todavía no hay dato (o falló). La pantalla no muestra nada en ese caso.
     private val _holidayText = MutableStateFlow<String?>(null)
