@@ -38,10 +38,11 @@ data class LoginUiState(
         get() = emailError == null && passwordError == null
 }
 
-class AuthViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = AuthRepository()
-    private val sessionManager = SessionManager(application)
+class AuthViewModel(
+    application: Application,
+    private val repository: AuthRepository = AuthRepository(),
+    private val sessionManager: SessionManager=SessionManager(application)
+) : AndroidViewModel(application) {
 
     private val _currentUser = MutableStateFlow<User?>(sessionManager.getSavedUser())
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
