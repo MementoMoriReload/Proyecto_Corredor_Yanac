@@ -101,4 +101,15 @@ class TicketViewModel : ViewModel() {
                 .onFailure { Log.e("TicketVM","No se pudo crear: ${it.userMessage()}") }
         }
     }
+
+    fun deleteTicket(ticketId: Int, onDeleted: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.deleteTicket(ticketId)
+                .onSuccess {
+                    onDeleted()
+                    _tickets.update { list -> list.filterNot { it.id == ticketId } }
+                }
+                .onFailure { Log.e("TicketVM", "No se pudo eliminar: ${it.userMessage()}") }
+        }
+    }
 }

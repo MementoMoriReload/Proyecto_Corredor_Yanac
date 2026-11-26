@@ -23,6 +23,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import kotlin.jvm.Throws
 import java.util.concurrent.TimeUnit
+import retrofit2.http.DELETE
 
 
 
@@ -141,6 +142,16 @@ fun <T> Response<T>.bodyOrThrow(): T {
     }
     throw ApiException(serverMessage ?: "Error del servidor (${code()})")
 }
+fun Response<Unit>.requireSuccess() {
+    if (isSuccessful) return
+    val errorBody = errorBody()?.string()
+    val serverMessage = try {
+        (Gson().fromJson(errorBody, Map::class.java)?.get("error")) as? String
+    } catch (e: Exception) {
+        null
+    }
+    throw ApiException(serverMessage ?: "Error del servidor (${code()})")
+}
 
 fun Throwable.userMessage(): String  = when (this) {
     is ApiException -> message ?: "Error del servidor"
@@ -181,6 +192,8 @@ interface ApiService {
     @PATCH("api/v1/ticket/{id}/assign")
     suspend fun assignTicket(@Path("id") id: Long, @Body request: AssignRequest): Response<TicketDTO>
 
+    @DELETE("api/v1/ticket/{id}")
+    suspend fun deleteTicket(@Path("id") id: Long): Response<Unit>
 }
 
 object ApiClient {

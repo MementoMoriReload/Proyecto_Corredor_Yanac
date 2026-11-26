@@ -13,6 +13,7 @@ import com.example.panalsuite.network.StatusRequest
 import com.example.panalsuite.network.TicketRequestDTO
 import com.example.panalsuite.network.bodyOrThrow
 import com.example.panalsuite.network.toTicket
+import com.example.panalsuite.network.requireSuccess
 
 class TicketRepository(private val apiService: ApiService = ApiClient.service) {
 
@@ -51,5 +52,9 @@ class TicketRepository(private val apiService: ApiService = ApiClient.service) {
     suspend fun assignTicket(ticketId: Int, resoverId: Long?): Result<Ticket> = runCatching {
         apiService.assignTicket(ticketId.toLong(), AssignRequest(resoverId))
             .bodyOrThrow().toTicket()
+    }
+
+    suspend fun deleteTicket(ticketId: Int): Result<Unit> = runCatching {
+        apiService.deleteTicket(ticketId.toLong()).requireSuccess()
     }
 }
