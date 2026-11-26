@@ -40,6 +40,8 @@ import com.example.panalsuite.model.User
 import com.example.panalsuite.model.UserRole
 import com.example.panalsuite.viewmodel.MenuBarViewModel
 import com.example.panalsuite.viewmodel.TicketViewModel
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 
 @Composable
 fun TicketDetailScreen(
@@ -97,7 +99,12 @@ fun TicketDetailScreen(
             },
             onAssignResolver = { resolverId ->
                 ticketViewModel.assignTicket(currentTicket.id, resolverId)
+            },
+
+            onDeleteTicket = {
+                ticketViewModel.deleteTicket(currentTicket.id) { onBackClick() }
             }
+
         )
     }
 }
@@ -116,11 +123,13 @@ fun TicketDetailScreenContent(
     onLogoutClick: () -> Unit,
     onCloseTicket: () -> Unit,
     onAddComment: (String) -> Unit,
-    onAssignResolver: (String?) -> Unit
+    onAssignResolver: (String?) -> Unit,
+    onDeleteTicket: () -> Unit
 ) {
     var commentText by remember { mutableStateOf("") }
     val resolvers = remember(users) { users.filter { it.role == UserRole.RESOLVER } }
     var resolversExpanded by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val currentResolver = remember(ticket.assignedId, users) {
         users.find { it.id == ticket.assignedId }
@@ -133,6 +142,23 @@ fun TicketDetailScreenContent(
             onManagementClick = onManagementClick,
             onRegisterClick = onRegisterClick,
             onProfileClick = onProfileClick
+        )
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Eliminar ticket") },
+            text = { Text("¿Seguro que quieres eliminar el ticket #${ticket.id}? Esta acción no se puede deshacer.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = false
+                    onDeleteTicket()
+                }) { Text("Eliminar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) { Text("Cancelar") }
+            }
         )
     }
 
@@ -357,6 +383,21 @@ fun TicketDetailScreenContent(
                                 .height(50.dp)
                         ) {
                             Text("Cerrar ticket")
+                        }
+                    }
+
+                    if (user.role.canManage) {
+                        Button(
+                            onClick = { showDeleteDialog = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                        ) {
+                            Text("Eliminar ticket")
                         }
                     }
                 }
